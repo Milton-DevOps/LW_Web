@@ -1,0 +1,30 @@
+@layer components {
+  .hero-container {
+    @apply relative w-full min-h-screen flex items-center justify-center overflow-hidden;
+  }
+
+  .hero-background {
+    background-size: cover;
+    background-position: center;
+  }
+
+  .hero-overlay {
+    @apply absolute inset-0 bg-black/40 z-10;
+  }
+
+  .hero-content {
+    @apply relative z-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center;
+  }
+
+  .hero-title {
+    @apply text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6;
+  }
+
+  .hero-subtitle {
+    @apply text-lg sm:text-xl md:text-2xl text-gray-200 mb-8 sm:mb-12 max-w-3xl mx-auto;
+  }
+
+  .hero-cta {
+    @apply inline-block px-6 sm:px-8 md:px-10 py-3 sm:py-4 bg-[#cb4154] hover:bg-[#b8364b] text-white font-bold text-base sm:text-lg transition-colors duration-200;
+  }
+}
