@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from 'react' ;
 import { useRouter } from 'next/navigation';
-import { Button } from '../../components/Button';
-import { Input } from '../../components/Input';
-import { colors } from '../../constants/colors';
-import { useAuth } from '../../hooks/useAuth';
-import { getToken } from '../../services/authService';
-import styles from './auth.module.css';
+import { Button } from '../../../components/Button';
+import { Input } from '../../../components/Input';
+import { colors } from '../../../constants/colors';
+import { useAuth } from '../../../hooks/useAuth';
+import { getToken } from '../../../services/authService';
+import styles from '../auth.module.css';
 
 export default function EditProfile() {
   const router = useRouter();
@@ -99,13 +99,13 @@ export default function EditProfile() {
   };
 
   return (
-    <div className={styles.authContainer} style={{ background: colors.light.surface }}>
-      <div className={styles.authCard} style={{ borderColor: colors.light.border }}>
+    <div className={styles.authContainer}>
+      <div className={styles.authCard}>
         <div className={styles.authCardContent}>
           {/* Left Section - Form */}
           <div className={styles.authCardLeft}>
             <div>
-              <h2 className={styles.authTitle} style={{ color: colors.light.text }}>
+              <h2 className={styles.authTitle}>
                 COMPLETE YOUR PROFILE
               </h2>
               <p className={styles.authSubtitle}>Update your personal information</p>
@@ -179,12 +179,13 @@ export default function EditProfile() {
 
           {/* Right Section - Profile Picture */}
           <div className={styles.authCardRight}>
-            <div style={{ width: '100%' }}>
+            <div className={styles.fullWidth}>
               <label className={styles.fileInputLabel}>
                 Profile Picture (Optional)
               </label>
               <input
                 type="file"
+                title="Profile picture upload"
                 accept="image/*"
                 onChange={handleProfilePictureChange}
                 className={styles.fileInput}

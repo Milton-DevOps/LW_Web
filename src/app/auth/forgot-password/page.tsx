@@ -9,6 +9,7 @@ import { colors } from '../../../constants/colors';
 import { useAuth } from '../../../hooks/useAuth';
 import { getToken } from '../../../services/authService';
 import styles from '../auth.module.css';
+import utils from '../utilities.module.css';
 
 export default function Register() {
   const router = useRouter();
@@ -141,36 +142,18 @@ export default function Register() {
       <div className={`${styles.authCard} ${styles.authCardWithImage}`}>
         {/* Left Section - Image Preview */}
         <div 
-          className={styles.authImageSection}
+          className={`${styles.authImageSection} ${utils.imageContainer}`}
           onClick={handleImageClick}
-          style={{ cursor: 'pointer', position: 'relative' }}
         >
           {profilePreview ? (
             <>
               <img 
                 src={profilePreview} 
                 alt="Profile" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                className={utils.imagePreview}
               />
               <div
-                style={{
-                  position: 'absolute',
-                  top: '8px',
-                  right: '8px',
-                  backgroundColor: 'rgba(203, 65, 84, 0.9)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '32px',
-                  height: '32px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  fontSize: '18px',
-                  fontWeight: 'bold',
-                  zIndex: 10,
-                }}
+                className={utils.closeButton}
                 onClick={handleRemoveImage}
                 title="Remove image"
               >
@@ -178,32 +161,21 @@ export default function Register() {
               </div>
             </>
           ) : (
-            <div 
-              style={{
-                textAlign: 'center',
-                color: '#999',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%',
-                gap: '10px',
-              }}
-            >
+            <div className={utils.uploadContainer}>
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                 <circle cx="8.5" cy="8.5" r="1.5"></circle>
                 <polyline points="21 15 16 10 5 21"></polyline>
               </svg>
-              <p style={{ fontSize: '14px', fontWeight: '500' }}>Click to upload photo</p>
-              <p style={{ fontSize: '12px' }}>or drag and drop</p>
+              <p className={utils.uploadPlaceholder}>Click to upload photo</p>
+              <p className={utils.uploadSubtext}>or drag and drop</p>
             </div>
           )}
         </div>
 
         {/* Right Section - Form */}
         <div className={styles.authFormSection}>
-          <h2 className={styles.authTitle} style={{ color: colors.light.text }}>
+          <h2 className={styles.authTitle}>
             REGISTRATION FORM
           </h2>
 
@@ -219,7 +191,7 @@ export default function Register() {
             type="file"
             accept="image/*"
             onChange={handleProfilePictureChange}
-            style={{ display: 'none' }}
+            className={utils.hiddenFileInput}
             aria-label="Upload profile picture"
           />
 
@@ -270,6 +242,7 @@ export default function Register() {
                 Gender <span className="text-red-500">*</span>
               </label>
               <select 
+                title="Gender selection"
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
                 className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors bg-white"
@@ -338,9 +311,9 @@ export default function Register() {
             </Button>
           </form>
 
-          <p className={styles.footer} style={{ marginTop: '1rem' }}>
+          <p className={`${styles.footer} ${styles.footerWithMargin}`}>
             Already have an account?{' '}
-            <Link href="/auth/login" style={{ color: colors.light.primary }}>
+            <Link href="/auth/login" className={styles.primaryLink}>
               Login
             </Link>
           </p>

@@ -8,7 +8,7 @@ import { Button } from '../../../components/Button';
 import { Input } from '../../../components/Input';
 import { colors } from '../../../constants/colors';
 import { useAuth } from '../../../hooks/useAuth';
-import { getToken } from '../../../services/authService';
+import { getToken, saveToken, saveUser } from '../../../services/authService';
 import styles from '../auth.module.css';
 
 export default function Register() {
@@ -52,7 +52,7 @@ export default function Register() {
     clearError();
 
     // Validation
-    if (!firstName || !lastName || !email || !password || !whatsappNumber) {
+    if (!firstName || !lastName || !email || !password) {
       setFormError('Please fill in all required fields');
       return;
     }
@@ -98,6 +98,8 @@ export default function Register() {
       }
 
       await handleRegister(userData);
+      // Email/password registration goes directly to home
+      // (No profile completion needed as all info was provided during registration)
       router.push('/');
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Registration failed');
@@ -128,8 +130,9 @@ export default function Register() {
           throw new Error(data.message || 'Google registration failed');
         }
 
-        // Save user data using auth hook
-        await handleGoogleAuth(data.token);
+        // Save user data directly (don't call handleGoogleAuth as it would make another API call)
+        saveToken(data.token);
+        saveUser(data.user);
         
         // Redirect based on profile completion
         if (data.needsProfileCompletion) {
@@ -163,7 +166,7 @@ export default function Register() {
 
         {/* Right Section - Form */}
         <div className={styles.authFormSection}>
-          <h2 className={styles.authTitle} style={{ color: colors.light.text }}>
+          <h2 className={styles.authTitle}>
             REGISTRATION FORM
           </h2>
 
@@ -217,11 +220,11 @@ export default function Register() {
 
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">
-                Phone Number <span className="text-red-500">*</span>
+                WhatsApp Number (Optional)
               </label>
               <input
                 type="tel"
-                placeholder="Phone Number"
+                placeholder="WhatsApp Number"
                 value={whatsappNumber}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWhatsappNumber(e.target.value)}
                 className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors"
@@ -260,6 +263,7 @@ export default function Register() {
               </label>
               <input
                 type="file"
+                title="Profile picture upload"
                 accept="image/*"
                 onChange={handleProfilePictureChange}
                 className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors cursor-pointer"
@@ -274,23 +278,22 @@ export default function Register() {
             </Button>
           </form>
 
-          <div className={styles.divider} style={{ marginTop: '1rem' }}>Or register with</div>
+          <div className={styles.dividerLargeMargin}>Or register with</div>
 
           <div className={styles.socialButtons}>
             <button
               type="button"
               onClick={() => googleRegister()}
               className={styles.socialButton}
-              style={{ borderColor: colors.light.border, border: `1px solid ${colors.light.border}` }}
               disabled={loading}
             >
               {loading ? 'SIGNING UP...' : 'Google'}
             </button>
           </div>
 
-          <p className={styles.footer} style={{ marginTop: '1rem' }}>
+          <p className={`${styles.footer} ${styles.footerWithMargin}`}>
             Already have an account?{' '}
-            <Link href="/auth/login" style={{ color: colors.light.primary }}>
+            <Link href="/auth/login" className={styles.primaryLink}>
               Login
             </Link>
           </p>

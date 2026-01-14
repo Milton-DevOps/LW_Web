@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { colors } from '@/constants/colors';
 
 interface CarouselItem {
   id: string | number;
@@ -18,14 +19,14 @@ interface CarouselProps {
 }
 
 export const Carousel: React.FC<CarouselProps> = ({
-  items,
+  items = [],
   autoPlay = true,
   autoPlayInterval = 5000,
   showControls = true,
   showIndicators = true,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const nextSlide = () => {
     setCurrentIndex((prev) => (prev + 1) % items.length);
@@ -64,7 +65,7 @@ export const Carousel: React.FC<CarouselProps> = ({
   return (
     <div className="relative w-full overflow-hidden">
       {/* Main Carousel Container */}
-      <div className="relative w-full h-96 sm:h-[500px] md:h-[600px] lg:h-[700px] bg-gray-900">
+      <div className="relative w-full h-[90vh] sm:h-[600px] md:h-[750px] lg:h-[900px] bg-gray-900">
         {/* Slides */}
         {items.map((item, index) => (
           <div

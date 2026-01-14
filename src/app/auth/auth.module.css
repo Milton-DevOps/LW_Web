@@ -122,6 +122,44 @@
   text-decoration: underline;
 }
 
+/* Utility classes for dynamic styling */
+.authTitlePrimary {
+  /* Primary color from constants/colors.ts - light.primary */
+  color: #cb4154;
+}
+
+.dividerWithMargin {
+  margin-top: 1rem;
+}
+
+.dividerLargeMargin {
+  margin-top: 1.5rem;
+}
+
+.footerWithMargin {
+  margin-top: 1rem;
+}
+
+.socialButtonGroup {
+  border-color: #e5e7eb;
+  border: 1px solid #e5e7eb;
+}
+
+.primaryLink {
+  /* Primary color from constants/colors.ts - light.primary */
+  color: #cb4154;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.primaryLink:hover {
+  text-decoration: underline;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
 .profileImageContainer {
   text-align: center;
   display: flex;
@@ -135,6 +173,7 @@
   height: 180px;
   object-fit: cover;
   border-radius: 0.375rem;
+  /* Primary border color from constants/colors.ts - light.primary */
   border: 3px solid #cb4154;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   margin-bottom: 1rem;
@@ -159,6 +198,7 @@
 
 .fileInput:focus {
   outline: none;
+  /* Primary focus color from constants/colors.ts - light.primary */
   border-color: #cb4154;
 }
 

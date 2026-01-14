@@ -1,4 +1,5 @@
 import React from 'react';
+import { colors } from '@/constants/colors';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'tertiary';
@@ -12,6 +13,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyles = 'font-semibold transition-colors duration-200 flex items-center justify-center';
 
     const variantStyles = {
+      // Colors from constants/colors.ts - light theme
       primary: 'bg-[#cb4154] hover:bg-[#b8364b] text-white dark:bg-[#ff6b7a] dark:hover:bg-[#ff5567]',
       secondary: 'bg-[#7e8ba3] hover:bg-[#6d7a92] text-white dark:bg-[#a8b8d8] dark:hover:bg-[#96a6cc]',
       tertiary: 'bg-[#f5a623] hover:bg-[#e09510] text-white dark:bg-[#ffc857] dark:hover:bg-[#ffb840]',

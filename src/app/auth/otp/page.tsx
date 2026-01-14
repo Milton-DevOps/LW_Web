@@ -2,8 +2,9 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Button } from "../../components/Button";
-import { colors } from "../../constants/colors";
+import { Button } from "../../../components/Button";
+import { colors } from "../../../constants/colors";
+import styles from '../utilities.module.css';
 
 export default function OTP() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -58,10 +59,10 @@ export default function OTP() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: colors.light.surface }}>
-      <div className="w-full max-w-sm bg-white border rounded-lg shadow-md p-8" style={{ borderColor: colors.light.border }}>
-        <h2 className="text-center text-xl font-bold mb-2" style={{ color: colors.light.text }}>VERIFY OTP</h2>
-        <p className="text-center text-sm mb-6" style={{ color: colors.light.textSecondary }}>
+    <div className={`min-h-screen flex items-center justify-center ${styles.bgSurface}`}>
+      <div className={`w-full max-w-sm bg-white border rounded-lg shadow-md p-8 ${styles.bgBorder}`}>
+        <h2 className={`text-center text-xl font-bold mb-2 ${styles.textDarkColor}`}>VERIFY OTP</h2>
+        <p className={`text-center text-sm mb-6 ${styles.textSecondaryColor}`}>
           We&apos;ve sent a one-time password to your email
         </p>
 
@@ -81,12 +82,12 @@ export default function OTP() {
                   value={digit}
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
-                  className="w-12 h-12 text-center text-xl font-bold border-2 rounded-lg focus:outline-none transition-colors"
+                  className={`w-12 h-12 text-center text-xl font-bold border-2 rounded-lg focus:outline-none transition-colors ${styles.otpInput}`}
                   style={{
                     borderColor: digit ? colors.light.primary : colors.light.border,
                     color: colors.light.text,
                   }}
-                  placeholder="-"
+                  title="OTP digit input"
                 />
               ))}
             </div>

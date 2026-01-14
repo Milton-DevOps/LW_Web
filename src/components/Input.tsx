@@ -1,4 +1,5 @@
 import React from 'react';
+import { colors } from '@/constants/colors';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;

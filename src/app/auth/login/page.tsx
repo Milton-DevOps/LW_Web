@@ -3,66 +3,26 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useGoogleLogin } from '@react-oauth/google';
 import { Button } from '../../../components/Button';
-import { Input } from '../../../components/Input';
 import { colors } from '../../../constants/colors';
 import { useAuth } from '../../../hooks/useAuth';
-import { getToken } from '../../../services/authService';
+import { getToken, saveToken, saveUser } from '../../../services/authService';
 import styles from '../auth.module.css';
-
-declare global {
-  interface Window {
-    google?: any;
-  }
-}
 
 export default function Login() {
   const router = useRouter();
-  const { handleLogin, loading, error, clearError } = useAuth();
+  const { loading, error, clearError } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [remember, setRemember] = useState(false);
   const [formError, setFormError] = useState('');
-  const [googleLoading, setGoogleLoading] = useState(false);
 
   useEffect(() => {
     if (getToken()) {
-      // Uncomment to redirect already logged in users
+      // User already logged in, uncomment to auto-redirect
       // router.push('/');
     }
   }, [router]);
-
-  useEffect(() => {
-    // Initialize Google Sign-In
-    if (window.google) {
-      window.google.accounts.id.initialize({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
-        callback: handleGoogleSignIn,
-      });
-      window.google.accounts.id.renderButton(
-        document.getElementById('google-signin-button'),
-        { theme: 'outline', size: 'large', width: '100%' }
-      );
-    }
-  }, []);
-
-  const handleGoogleSignIn = async (response: any) => {
-    setGoogleLoading(true);
-    try {
-      const { handleGoogleAuth } = await import('../../../hooks/useAuth');
-      // This will be called from the hook through router navigation
-      const result = await (window as any).authHook?.handleGoogleAuth(response.credential);
-      if (result?.needsProfileCompletion) {
-        router.push('/auth/edit-profile');
-      } else {
-        router.push('/');
-      }
-    } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Google sign-in failed');
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,27 +40,72 @@ export default function Login() {
     }
 
     try {
-      await handleLogin({ email, password });
-      if (remember) {
-        localStorage.setItem('rememberEmail', email);
-      } else {
-        localStorage.removeItem('rememberEmail');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
       }
+
+      saveToken(data.token);
+      saveUser(data.user);
       router.push('/');
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Login failed');
     }
   };
 
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (codeResponse) => {
+      try {
+        setFormError('');
+        clearError();
+        
+        const { access_token } = codeResponse;
+        
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google-auth`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ accessToken: access_token }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Google login failed');
+        }
+
+        saveToken(data.token);
+        saveUser(data.user);
+        
+        // For login, profile is already complete (registered users)
+        router.push('/');
+      } catch (err) {
+        setFormError(err instanceof Error ? err.message : 'Google login failed');
+      }
+    },
+    onError: () => {
+      setFormError('Google login failed');
+    },
+    flow: 'implicit',
+  });
+
   return (
-    <div className={styles.authContainer} style={{ background: colors.light.surface }}>
-      <div className={styles.authCard} style={{ borderColor: colors.light.border }}>
-        <div className={styles.authCardLeft}>
-          <div>
-            <h2 className={styles.authTitle} style={{ color: colors.light.text }}>
-              LOGIN
-            </h2>
-          </div>
+    <div className={styles.authContainer}>
+      <div className={styles.authCard}>
+        <div className={styles.authFormSection}>
+          <h2 className={styles.authTitle}>
+            LOGIN
+          </h2>
 
           {(formError || error) && (
             <div className={styles.errorMessage} role="alert">
@@ -108,54 +113,58 @@ export default function Login() {
             </div>
           )}
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <Input
-              label="Email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-              fullWidth
-            />
-
-            <Input
-              label="Password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-              fullWidth
-            />
-
-            <div className="flex items-center justify-between mt-1 text-xs sm:text-sm">
-              <label className="inline-flex items-center text-gray-600">
-                <input
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                  className="mr-2 w-4 h-4"
-                />
-                Remember me
+          <form className="space-y-3" onSubmit={handleSubmit}>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Email <span className="text-red-500">*</span>
               </label>
-              <Link href="/auth/forgot-password" className="text-gray-600 hover:underline">
-                Forgot password?
-              </Link>
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors"
+              />
             </div>
 
-            <Button type="submit" fullWidth className="mt-3" disabled={loading}>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
+                Password <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors"
+              />
+            </div>
+
+            <Link href="/auth/forgot-password" className={styles.primaryLink}>
+              <p className="text-xs hover:underline">Forgot password?</p>
+            </Link>
+
+            <Button type="submit" fullWidth className="mt-4 text-sm" disabled={loading}>
               {loading ? 'LOGGING IN...' : 'LOGIN'}
             </Button>
           </form>
 
-          <div className={styles.divider}>Or login with</div>
+          <div className={styles.dividerLargeMargin}>Or login with</div>
 
           <div className={styles.socialButtons}>
-            <div id="google-signin-button" className="w-full"></div>
+            <button
+              type="button"
+              onClick={() => googleLogin()}
+              className={styles.socialButton}
+              disabled={loading}
+            >
+              {loading ? 'SIGNING IN...' : 'Google'}
+            </button>
           </div>
 
-          <p className={styles.footer}>
+          <p className={`${styles.footer} ${styles.footerWithMargin}`}>
             Don&apos;t have an account?{' '}
-            <Link href="/auth/register" style={{ color: colors.light.primary }}>
+            <Link href="/auth/register" className={styles.primaryLink}>
               Register
             </Link>
           </p>
