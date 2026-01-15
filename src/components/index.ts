@@ -3,3 +3,12 @@ export { Input } from './Input';
 export { Hero } from './Hero';
 export { Carousel } from './Carousel';
 export { Navbar } from './Navbar';
+
+// Admin Components
+export { default as AdminDashboard } from './adminComponents/AdminDashboard';
+export { default as Header } from './adminComponents/Header';
+export { default as Sidebar } from './adminComponents/Sidebar';
+export { default as ManageSermons } from './adminComponents/ManageSermons';
+export { default as ManageUsers } from './adminComponents/ManageUsers';
+export { default as ManageBooks } from './adminComponents/ManageBooks';
+export { default as LiveStream } from './adminComponents/LiveStream';
