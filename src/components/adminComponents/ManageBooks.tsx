@@ -181,12 +181,8 @@ const ManageBooks: React.FC = () => {
               onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
             />
             <select
-              className="px-4 py-2 border rounded"
-              style={{
-                borderColor: colorScheme.border,
-                backgroundColor: colorScheme.background,
-                color: colorScheme.text,
-              }}
+              title="Book category"
+              className="w-full px-4 py-2.5 text-base border-2 border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors bg-white text-gray-900"
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
             >
@@ -195,12 +191,8 @@ const ManageBooks: React.FC = () => {
               ))}
             </select>
             <select
-              className="px-4 py-2 border rounded"
-              style={{
-                borderColor: colorScheme.border,
-                backgroundColor: colorScheme.background,
-                color: colorScheme.text,
-              }}
+              title="Book status"
+              className="w-full px-4 py-2.5 text-base border-2 border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors bg-white text-gray-900"
               value={formData.status}
               onChange={(e) =>
                 setFormData({

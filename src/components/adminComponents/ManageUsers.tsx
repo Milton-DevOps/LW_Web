@@ -347,12 +347,8 @@ const ManageUsers: React.FC<ManageUsersProps> = () => {
               <div>
                 <label className="block text-xs sm:text-sm font-medium mb-2">Role *</label>
                 <select
-                  className="w-full px-3 sm:px-4 py-2 text-sm border rounded"
-                  style={{
-                    borderColor: colorScheme.border,
-                    backgroundColor: colorScheme.background,
-                    color: colorScheme.text,
-                  }}
+                  title="User role"
+                  className="w-full px-3 sm:px-4 py-2.5 text-sm border-2 border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors bg-white text-gray-900"
                   value={formData.role}
                   onChange={(e) =>
                     setFormData({
@@ -373,12 +369,8 @@ const ManageUsers: React.FC<ManageUsersProps> = () => {
                 <div>
                   <label className="block text-xs sm:text-sm font-medium mb-2">Department *</label>
                   <select
-                    className="w-full px-3 sm:px-4 py-2 text-sm border rounded"
-                    style={{
-                      borderColor: colorScheme.border,
-                      backgroundColor: colorScheme.background,
-                      color: colorScheme.text,
-                    }}
+                    title="Department"
+                    className="w-full px-3 sm:px-4 py-2.5 text-sm border-2 border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors bg-white text-gray-900"
                     value={formData.department}
                     onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                   >

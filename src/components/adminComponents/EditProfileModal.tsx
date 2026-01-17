@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Input } from '@/components';
 import { colors } from '@/constants/colors';
+import { useAuthContext } from '@/contexts/AuthContext';
 import styles from './EditProfileModal.module.css';
 
 interface EditProfileModalProps {
@@ -15,18 +16,42 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   onClose,
 }) => {
   const colorScheme = colors;
+  const { user, handleUpdateProfile, loading, error } = useAuthContext();
   const [profile, setProfile] = useState({
-    firstName: 'Robert',
-    lastName: 'William',
-    email: 'robert.william@lightworldmission.com',
-    phone: '+1 (555) 123-4567',
-    department: 'Administration',
-    bio: 'Admin of Light World Mission',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    whatsappNumber: '',
   });
 
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Initialize form with current user data when modal opens
+  useEffect(() => {
+    if (isOpen && user) {
+      setProfile({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phoneNumber: user.phoneNumber || '',
+        whatsappNumber: user.whatsappNumber || '',
+      });
+      // Set profile picture from user if available
+      if (user.profilePicture?.url) {
+        setProfilePreview(user.profilePicture.url);
+      } else {
+        setProfilePreview(null);
+      }
+      setProfilePicture(null);
+      setIsSaved(false);
+      setSaveError('');
+    }
+  }, [isOpen, user]);
 
   const handleChange = (field: string, value: string) => {
     setProfile(prev => ({
@@ -34,6 +59,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       [field]: value,
     }));
     setIsSaved(false);
+    setSaveError('');
   };
 
   const handleProfilePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,11 +68,13 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       
       // Validate file type
       if (!file.type.startsWith('image/')) {
+        setSaveError('Please select a valid image file');
         return;
       }
       
       setProfilePicture(file);
       setIsSaved(false);
+      setSaveError('');
 
       // Create preview
       const reader = new FileReader();
@@ -57,19 +85,59 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     }
   };
 
-  const handleSave = () => {
-    console.log('Profile saved:', profile);
-    if (profilePicture) {
-      console.log('Profile picture:', profilePicture);
+  const handleSave = async () => {
+    try {
+      setSaveError('');
+      setIsSaving(true);
+
+      // Prepare profile data
+      const profileData: any = {
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        phoneNumber: profile.phoneNumber,
+        whatsappNumber: profile.whatsappNumber,
+      };
+
+      // Handle profile picture - if it's a file, convert to base64
+      if (profilePicture) {
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          profileData.profilePictureUrl = event.target?.result as string;
+          try {
+            await handleUpdateProfile(profileData);
+            setIsSaved(true);
+            setTimeout(() => {
+              setIsSaved(false);
+              onClose();
+            }, 1500);
+          } catch (err) {
+            setSaveError(err instanceof Error ? err.message : 'Failed to update profile');
+          } finally {
+            setIsSaving(false);
+          }
+        };
+        reader.readAsDataURL(profilePicture);
+      } else {
+        // No new profile picture, just update other fields
+        await handleUpdateProfile(profileData);
+        setIsSaved(true);
+        setTimeout(() => {
+          setIsSaved(false);
+          onClose();
+        }, 1500);
+        setIsSaving(false);
+      }
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to update profile');
+      setIsSaving(false);
     }
-    setIsSaved(true);
-    setTimeout(() => {
-      setIsSaved(false);
-      onClose();
-    }, 1500);
   };
 
   if (!isOpen) return null;
+
+  const getInitials = () => {
+    return `${user?.firstName?.charAt(0) || 'U'}${user?.lastName?.charAt(0) || 'S'}`;
+  };
 
   return (
     <>
@@ -92,28 +160,30 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           </button>
         </div>
 
-        {/* Content */}
-        <div className={styles.content}>
+        {/* Image Section - Left Side */}
+        <div className={styles.imageSection}>
+          {profilePreview ? (
+            <img src={profilePreview} alt="Profile" />
+          ) : (
+            <div className={styles.imagePlaceholder}>
+              <p>Profile Image Preview</p>
+            </div>
+          )}
+        </div>
+
+        {/* Form Section - Right Side */}
+        <div className={styles.formSection}>
           {isSaved && (
             <div className={styles.successMessage}>
               ✓ Profile saved successfully!
             </div>
           )}
 
-          {/* Profile Avatar */}
-          <div className={styles.avatarContainer}>
-            {profilePreview ? (
-              <img 
-                src={profilePreview} 
-                alt="Profile" 
-                className={styles.avatarImage}
-              />
-            ) : (
-              <div className={styles.avatarInitials}>
-                RW
-              </div>
-            )}
-          </div>
+          {saveError && (
+            <div className={styles.errorMessage}>
+              ✗ {saveError}
+            </div>
+          )}
 
           {/* Form Fields */}
           <form className={styles.form}>
@@ -124,6 +194,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                   type="text"
                   value={profile.firstName}
                   onChange={(e) => handleChange('firstName', e.target.value)}
+                  disabled={isSaving}
                 />
               </div>
 
@@ -133,46 +204,37 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                   type="text"
                   value={profile.lastName}
                   onChange={(e) => handleChange('lastName', e.target.value)}
+                  disabled={isSaving}
                 />
               </div>
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Email</label>
+              <label className={styles.label}>Email (Read-only)</label>
               <Input
                 type="email"
                 value={profile.email}
-                onChange={(e) => handleChange('email', e.target.value)}
+                disabled={true}
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Phone</label>
+              <label className={styles.label}>Phone Number</label>
               <Input
                 type="tel"
-                value={profile.phone}
-                onChange={(e) => handleChange('phone', e.target.value)}
+                value={profile.phoneNumber}
+                onChange={(e) => handleChange('phoneNumber', e.target.value)}
+                disabled={isSaving}
               />
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Department</label>
+              <label className={styles.label}>WhatsApp Number</label>
               <Input
-                type="text"
-                value={profile.department}
-                onChange={(e) => handleChange('department', e.target.value)}
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Bio</label>
-              <textarea
-                title="Bio"
-                placeholder="Enter your bio"
-                className={styles.textarea}
-                rows={3}
-                value={profile.bio}
-                onChange={(e) => handleChange('bio', e.target.value)}
+                type="tel"
+                value={profile.whatsappNumber}
+                onChange={(e) => handleChange('whatsappNumber', e.target.value)}
+                disabled={isSaving}
               />
             </div>
 
@@ -186,28 +248,31 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 accept="image/*"
                 onChange={handleProfilePictureChange}
                 className={styles.fileInput}
+                disabled={isSaving}
               />
               {profilePicture && (
                 <p className={styles.fileName}>{profilePicture.name}</p>
               )}
             </div>
           </form>
-        </div>
 
-        {/* Footer */}
-        <div className={styles.footer}>
-          <Button
-            onClick={handleSave}
-            className={styles.buttonPrimary}
-          >
-            Save Changes
-          </Button>
-          <Button
-            onClick={onClose}
-            className={styles.buttonSecondary}
-          >
-            Cancel
-          </Button>
+          {/* Footer */}
+          <div className={styles.footer}>
+            <Button
+              onClick={handleSave}
+              className={styles.buttonPrimary}
+              disabled={isSaving}
+            >
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </Button>
+            <Button
+              onClick={onClose}
+              className={styles.buttonSecondary}
+              disabled={isSaving}
+            >
+              Cancel
+            </Button>
+          </div>
         </div>
       </div>
     </>

@@ -168,12 +168,7 @@ const ManageDepartments: React.FC = () => {
               }
             />
             <textarea
-              className="md:col-span-2 px-4 py-2 border rounded resize-none"
-              style={{
-                borderColor: colorScheme.border,
-                backgroundColor: colorScheme.background,
-                color: colorScheme.text,
-              }}
+              className="md:col-span-2 w-full px-4 py-2.5 text-base border-2 border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors bg-white text-gray-900 resize-none"
               placeholder="Department Description"
               rows={3}
               value={formData.description}

@@ -153,12 +153,9 @@ const Settings: React.FC = () => {
         <div>
           <label className="block text-sm font-medium mb-2">Address</label>
           <textarea
-            className="w-full px-4 py-2 border rounded"
-            style={{
-              borderColor: colorScheme.border,
-              backgroundColor: colorScheme.background,
-              color: colorScheme.text,
-            }}
+            title="Site address"
+            placeholder="Enter site address"
+            className="w-full px-4 py-2.5 text-base border-2 border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors bg-white text-gray-900"
             rows={3}
             value={settings.address}
             onChange={(e) => handleChange('address', e.target.value)}

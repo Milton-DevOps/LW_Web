@@ -28,6 +28,7 @@ interface AuthContextType {
   handleRequestPasswordReset: (email: string) => Promise<any>;
   handleVerifyOTP: (email: string, otp: string) => Promise<any>;
   handleResetPassword: (email: string, password: string, confirmPassword: string) => Promise<any>;
+  handleUpdateProfile: (profileData: any) => Promise<any>;
   handleLogout: () => void;
   clearError: () => void;
 }

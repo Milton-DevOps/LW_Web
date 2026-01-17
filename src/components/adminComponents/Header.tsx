@@ -235,7 +235,6 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
       <EditProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
-        colorMode={colorScheme}
       />
     </>
   );
