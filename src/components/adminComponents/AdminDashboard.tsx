@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { colors } from '@/constants/colors';
+import { dashboardService } from '@/services/dashboardService';
+import { getToken, getUser } from '@/services/authService';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import ManageSermons from './ManageSermons';
@@ -13,6 +15,37 @@ import LiveStream from './LiveStream';
 import Settings from './Settings';
 
 type DashboardSection = 'dashboard' | 'sermons' | 'live' | 'users' | 'books' | 'departments' | 'settings';
+
+interface DashboardStats {
+  sermons: {
+    totalSermons: number;
+    publishedSermons: number;
+    draftSermons: number;
+    totalViews: number;
+  };
+  books: {
+    totalBooks: number;
+    publishedBooks: number;
+    draftBooks: number;
+    totalDownloads: number;
+  };
+  liveStreams: {
+    totalStreams: number;
+    liveStreams: number;
+    scheduledStreams: number;
+    endedStreams: number;
+    totalViewers: number;
+  };
+  users: {
+    totalUsers: number;
+    activeUsers: number;
+    inactiveUsers: number;
+  };
+  departments: {
+    totalDepartments: number;
+    activeDepartments: number;
+  };
+}
 
 const AdminDashboard: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -30,7 +63,8 @@ const AdminDashboard: React.FC = () => {
 
   const handleLogout = () => {
     // Clear token and redirect to login
-    localStorage.removeItem('token');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
     router.push('/auth/login');
   };
 
@@ -65,7 +99,6 @@ const AdminDashboard: React.FC = () => {
       <div className="flex flex-1 mt-14 md:mt-16">
         {/* Sidebar */}
         <Sidebar
-
           onNavigate={handleSectionChange}
           activeSection={activeSection}
           onLogout={handleLogout}
@@ -93,30 +126,162 @@ const AdminDashboard: React.FC = () => {
 
 const DashboardOverview: React.FC = () => {
   const colorScheme = colors;
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const stats = [
-    { label: 'Total Sermons', value: '24', color: '#cb4154' },
-    { label: 'Total Users', value: '156', color: '#7e8ba3' },
-    { label: 'Total Books', value: '42', color: '#f5a623' },
-    { label: 'Engagement Rate', value: '78%', color: '#27ae60' },
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const token = getToken();
+        if (!token) {
+          setError('No authentication token found');
+          return;
+        }
+
+        const dashboardStats = await dashboardService.getAllDashboardStats();
+        setStats(dashboardStats);
+      } catch (err) {
+        console.error('Error fetching dashboard stats:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load dashboard statistics');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardStats();
+  }, []);
+
+  const statCards = [
+    {
+      label: 'Total Sermons',
+      value: stats?.sermons.totalSermons || 0,
+      color: '#cb4154',
+      icon: '📺',
+    },
+    {
+      label: 'Total Users',
+      value: stats?.users.totalUsers || 0,
+      color: '#7e8ba3',
+      icon: '👥',
+    },
+    {
+      label: 'Total Books',
+      value: stats?.books.totalBooks || 0,
+      color: '#f5a623',
+      icon: '📚',
+    },
+    {
+      label: 'Live Streams',
+      value: stats?.liveStreams.totalStreams || 0,
+      color: '#27ae60',
+      icon: '🔴',
+    },
+    {
+      label: 'Total Views',
+      value: (stats?.sermons.totalViews || 0) + (stats?.liveStreams.totalViewers || 0),
+      color: '#3498db',
+      icon: '👁️',
+    },
+    {
+      label: 'Total Downloads',
+      value: stats?.books.totalDownloads || 0,
+      color: '#e74c3c',
+      icon: '⬇️',
+    },
+    {
+      label: 'Active Users',
+      value: stats?.users.activeUsers || 0,
+      color: '#2ecc71',
+      icon: '✓',
+    },
+    {
+      label: 'Departments',
+      value: stats?.departments.totalDepartments || 0,
+      color: '#9b59b6',
+      icon: '🏢',
+    },
   ];
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <h1 className="text-3xl md:text-4xl font-bold">Dashboard Overview</h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={i}
+              className="p-6 rounded-lg shadow-md animate-pulse"
+              style={{ backgroundColor: colorScheme.surface }}
+            >
+              <div className="w-12 h-12 rounded-lg mb-4 bg-gray-300" />
+              <div className="h-4 bg-gray-300 rounded mb-2" />
+              <div className="h-8 bg-gray-300 rounded" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-8">
+        <h1 className="text-3xl md:text-4xl font-bold">Dashboard Overview</h1>
+        <div
+          className="p-6 rounded-lg"
+          style={{ backgroundColor: colorScheme.surface }}
+        >
+          <div className="text-red-600 font-medium">
+            ⚠️ Error: {error}
+          </div>
+          <p className="mt-2" style={{ color: colorScheme.textSecondary }}>
+            Please try refreshing the page or contact support if the issue persists.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
-      <h1 className="text-3xl md:text-4xl font-bold">Dashboard Overview</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl md:text-4xl font-bold">Dashboard Overview</h1>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 rounded-lg transition-all"
+          style={{
+            backgroundColor: colors.primary,
+            color: '#ffffff',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.opacity = '0.9';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.opacity = '1';
+          }}
+        >
+          Refresh
+        </button>
+      </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        {stats.map((stat, index) => (
+        {statCards.map((stat, index) => (
           <div
             key={index}
-            className="p-6 rounded-lg shadow-md transition-transform hover:shadow-lg"
+            className="p-6 rounded-lg shadow-md transition-transform hover:shadow-lg hover:-translate-y-1"
             style={{ backgroundColor: colorScheme.surface }}
           >
             <div
-              className="w-12 h-12 rounded-lg mb-4"
-              style={{ backgroundColor: stat.color, opacity: 0.2 }}
-            />
+              className="w-12 h-12 rounded-lg mb-4 flex items-center justify-center text-2xl"
+              style={{ backgroundColor: stat.color, opacity: 0.1 }}
+            >
+              {stat.icon}
+            </div>
             <p
               className="text-sm font-medium mb-2"
               style={{ color: colorScheme.textSecondary }}
@@ -124,45 +289,132 @@ const DashboardOverview: React.FC = () => {
               {stat.label}
             </p>
             <p className="text-3xl font-bold" style={{ color: stat.color }}>
-              {stat.value}
+              {stat.value.toLocaleString()}
             </p>
           </div>
         ))}
       </div>
 
-      {/* Recent Activity */}
-      <div
-        className="p-6 rounded-lg shadow-md"
-        style={{ backgroundColor: colorScheme.surface }}
-      >
-        <h2 className="text-xl font-bold mb-4">Recent Activity</h2>
-        <div className="space-y-4">
-          {[1, 2, 3].map((item) => (
-            <div
-              key={item}
-              className="flex items-center justify-between p-4 rounded border-l-4 transition-all hover:shadow"
-              style={{
-                backgroundColor: colorScheme.background,
-                borderColor: colorScheme.primary,
-              }}
-            >
-              <div>
-                <p className="font-medium">Activity Item {item}</p>
-                <p style={{ color: colorScheme.textSecondary }}>
-                  2 hours ago
-                </p>
-              </div>
-              <span
-                className="px-3 py-1 rounded-full text-xs font-medium"
-                style={{
-                  backgroundColor: colorScheme.primary,
-                  color: '#ffffff',
-                }}
-              >
-                New
+      {/* Detailed Stats Sections */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Sermon Stats */}
+        <div
+          className="p-6 rounded-lg shadow-md"
+          style={{ backgroundColor: colorScheme.surface }}
+        >
+          <h2 className="text-xl font-bold mb-4 flex items-center">
+            <span className="mr-2">📺</span> Sermon Statistics
+          </h2>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center pb-2 border-b" style={{ borderColor: colorScheme.border }}>
+              <span>Published</span>
+              <span className="font-bold" style={{ color: colors.primary }}>
+                {stats?.sermons.publishedSermons || 0}
               </span>
             </div>
-          ))}
+            <div className="flex justify-between items-center pb-2 border-b" style={{ borderColor: colorScheme.border }}>
+              <span>Drafts</span>
+              <span className="font-bold text-yellow-600">
+                {stats?.sermons.draftSermons || 0}
+              </span>
+            </div>
+            <div className="flex justify-between items-center" style={{ color: colorScheme.textSecondary }}>
+              <span>Total Views</span>
+              <span className="font-bold" style={{ color: colors.primary }}>
+                {(stats?.sermons.totalViews || 0).toLocaleString()}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Book Stats */}
+        <div
+          className="p-6 rounded-lg shadow-md"
+          style={{ backgroundColor: colorScheme.surface }}
+        >
+          <h2 className="text-xl font-bold mb-4 flex items-center">
+            <span className="mr-2">📚</span> Book Statistics
+          </h2>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center pb-2 border-b" style={{ borderColor: colorScheme.border }}>
+              <span>Published</span>
+              <span className="font-bold" style={{ color: colors.primary }}>
+                {stats?.books.publishedBooks || 0}
+              </span>
+            </div>
+            <div className="flex justify-between items-center pb-2 border-b" style={{ borderColor: colorScheme.border }}>
+              <span>Drafts</span>
+              <span className="font-bold text-yellow-600">
+                {stats?.books.draftBooks || 0}
+              </span>
+            </div>
+            <div className="flex justify-between items-center" style={{ color: colorScheme.textSecondary }}>
+              <span>Total Downloads</span>
+              <span className="font-bold" style={{ color: colors.primary }}>
+                {(stats?.books.totalDownloads || 0).toLocaleString()}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Live Stream Stats */}
+        <div
+          className="p-6 rounded-lg shadow-md"
+          style={{ backgroundColor: colorScheme.surface }}
+        >
+          <h2 className="text-xl font-bold mb-4 flex items-center">
+            <span className="mr-2">🔴</span> Live Stream Statistics
+          </h2>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center pb-2 border-b" style={{ borderColor: colorScheme.border }}>
+              <span>Currently Live</span>
+              <span className="font-bold text-red-600">
+                {stats?.liveStreams.liveStreams || 0}
+              </span>
+            </div>
+            <div className="flex justify-between items-center pb-2 border-b" style={{ borderColor: colorScheme.border }}>
+              <span>Scheduled</span>
+              <span className="font-bold text-blue-600">
+                {stats?.liveStreams.scheduledStreams || 0}
+              </span>
+            </div>
+            <div className="flex justify-between items-center" style={{ color: colorScheme.textSecondary }}>
+              <span>Total Viewers</span>
+              <span className="font-bold" style={{ color: colors.primary }}>
+                {(stats?.liveStreams.totalViewers || 0).toLocaleString()}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* User & Department Stats */}
+        <div
+          className="p-6 rounded-lg shadow-md"
+          style={{ backgroundColor: colorScheme.surface }}
+        >
+          <h2 className="text-xl font-bold mb-4 flex items-center">
+            <span className="mr-2">👥</span> User & Department Stats
+          </h2>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center pb-2 border-b" style={{ borderColor: colorScheme.border }}>
+              <span>Active Users</span>
+              <span className="font-bold text-green-600">
+                {stats?.users.activeUsers || 0}
+              </span>
+            </div>
+            <div className="flex justify-between items-center pb-2 border-b" style={{ borderColor: colorScheme.border }}>
+              <span>Inactive Users</span>
+              <span className="font-bold text-gray-600">
+                {stats?.users.inactiveUsers || 0}
+              </span>
+            </div>
+            <div className="flex justify-between items-center" style={{ color: colorScheme.textSecondary }}>
+              <span>Active Departments</span>
+              <span className="font-bold" style={{ color: colors.primary }}>
+                {stats?.departments.activeDepartments || 0}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>

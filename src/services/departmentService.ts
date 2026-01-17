@@ -1,10 +1,22 @@
+import { getToken } from './authService';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+interface DepartmentParams {
+  [key: string]: string | number | boolean;
+}
+
+interface DepartmentData {
+  [key: string]: any;
+}
 
 export const departmentService = {
   // Get all departments with pagination and filtering
-  async getDepartments(params = {}) {
+  async getDepartments(params: DepartmentParams = {}) {
     try {
-      const queryString = new URLSearchParams(params).toString();
+      const queryString = new URLSearchParams(
+        Object.entries(params).map(([key, value]) => [key, String(value)])
+      ).toString();
       const response = await fetch(`${API_BASE_URL}/departments?${queryString}`);
       
       if (!response.ok) {
@@ -19,9 +31,9 @@ export const departmentService = {
   },
 
   // Get department by ID
-  async getDepartmentById(id) {
+  async getDepartmentById(id: string) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
       
       const response = await fetch(`${API_BASE_URL}/departments/${id}`, {
         headers: {
@@ -41,9 +53,9 @@ export const departmentService = {
   },
 
   // Create department
-  async createDepartment(departmentData) {
+  async createDepartment(departmentData: DepartmentData) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
       
       const response = await fetch(`${API_BASE_URL}/departments`, {
         method: 'POST',
@@ -67,9 +79,9 @@ export const departmentService = {
   },
 
   // Update department
-  async updateDepartment(id, departmentData) {
+  async updateDepartment(id: string, departmentData: DepartmentData) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
       
       const response = await fetch(`${API_BASE_URL}/departments/${id}`, {
         method: 'PUT',
@@ -93,9 +105,9 @@ export const departmentService = {
   },
 
   // Delete department
-  async deleteDepartment(id) {
+  async deleteDepartment(id: string) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
       
       const response = await fetch(`${API_BASE_URL}/departments/${id}`, {
         method: 'DELETE',
@@ -117,9 +129,9 @@ export const departmentService = {
   },
 
   // Add member to department
-  async addMember(id, userId) {
+  async addMember(id: string, userId: string) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
       
       const response = await fetch(`${API_BASE_URL}/departments/${id}/members`, {
         method: 'POST',
@@ -143,9 +155,9 @@ export const departmentService = {
   },
 
   // Remove member from department
-  async removeMember(id, userId) {
+  async removeMember(id: string, userId: string) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
       
       const response = await fetch(`${API_BASE_URL}/departments/${id}/members`, {
         method: 'DELETE',
@@ -164,28 +176,6 @@ export const departmentService = {
       return await response.json();
     } catch (error) {
       console.error('Error removing member:', error);
-      throw error;
-    }
-  },
-
-  // Get department statistics
-  async getDepartmentStats() {
-    try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      
-      const response = await fetch(`${API_BASE_URL}/departments/stats`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch department statistics');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching department stats:', error);
       throw error;
     }
   },

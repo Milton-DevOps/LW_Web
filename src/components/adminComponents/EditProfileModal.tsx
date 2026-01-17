@@ -160,20 +160,11 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
           </button>
         </div>
 
-        {/* Image Section - Left Side */}
-        <div className={styles.imageSection}>
-          {profilePreview ? (
-            <img src={profilePreview} alt="Profile" />
-          ) : (
-            <div className={styles.imagePlaceholder}>
-              <p>Profile Image Preview</p>
-            </div>
-          )}
-        </div>
-
-        {/* Form Section - Right Side */}
-        <div className={styles.formSection}>
-          {isSaved && (
+        {/* Main Content Container */}
+        <div className={styles.contentContainer}>
+          {/* Form Section - Left Side */}
+          <div className={styles.formSection}>
+            {isSaved && (
             <div className={styles.successMessage}>
               ✓ Profile saved successfully!
             </div>
@@ -272,6 +263,20 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
             >
               Cancel
             </Button>
+          </div>
+
+            {/* Image Section - Right Side (Circular) */}
+            <div className={styles.imageSection}>
+              <div className={styles.circularImageContainer}>
+                {profilePreview ? (
+                  <img src={profilePreview} alt="Profile" className={styles.circularImage} />
+                ) : (
+                  <div className={styles.circularImagePlaceholder}>
+                    <p>Profile Image</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

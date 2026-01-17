@@ -1,11 +1,27 @@
+import { getToken } from './authService';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+interface UserData {
+  [key: string]: any;
+}
+
+interface FetchParams {
+  [key: string]: string | number | boolean;
+}
 
 export const userService = {
   // Get all users with pagination and filtering
-  async getAllUsers(params = {}) {
+  async getAllUsers(params: FetchParams = {}) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      const queryString = new URLSearchParams(params).toString();
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
+      const queryString = new URLSearchParams(
+        Object.entries(params).map(([key, value]) => [key, String(value)])
+      ).toString();
       
       const response = await fetch(`${API_BASE_URL}/auth/admin/users?${queryString}`, {
         headers: {
@@ -25,9 +41,12 @@ export const userService = {
   },
 
   // Get user by ID
-  async getUserById(id) {
+  async getUserById(id: string) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
       
       const response = await fetch(`${API_BASE_URL}/auth/admin/users/${id}`, {
         headers: {
@@ -47,9 +66,12 @@ export const userService = {
   },
 
   // Update user
-  async updateUser(id, userData) {
+  async updateUser(id: string, userData: UserData) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
       
       const response = await fetch(`${API_BASE_URL}/auth/admin/users/${id}`, {
         method: 'PUT',
@@ -73,9 +95,12 @@ export const userService = {
   },
 
   // Delete user
-  async deleteUser(id) {
+  async deleteUser(id: string) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
       
       const response = await fetch(`${API_BASE_URL}/auth/admin/users/${id}`, {
         method: 'DELETE',
@@ -97,9 +122,12 @@ export const userService = {
   },
 
   // Create user (admin)
-  async createUser(userData) {
+  async createUser(userData: UserData) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
       
       const response = await fetch(`${API_BASE_URL}/auth/admin/create-user`, {
         method: 'POST',

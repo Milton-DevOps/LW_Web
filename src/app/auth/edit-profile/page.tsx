@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react' ;
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '../../../components/Button';
 import { Input } from '../../../components/Input';
@@ -157,22 +157,12 @@ export default function EditProfile() {
         </div>
       ) : (
       <div className={`${styles.authCard} ${styles.authCardWithImage}`}>
-        {/* Left Section - Image */}
-        <div className={styles.authImageSection}>
-          {profilePreview ? (
-            <img src={profilePreview} alt="Profile" />
-          ) : (
-            <div className="text-center text-gray-400">
-              <p className="text-sm">Profile Image Preview</p>
-            </div>
-          )}
-        </div>
-
-        {/* Right Section - Form */}
-        <div className={styles.authFormSection}>
-          <h2 className={styles.authTitle}>
-            COMPLETE YOUR PROFILE
-          </h2>
+        <div className={styles.authCardWithImageContent}>
+          {/* Left Section - Form */}
+          <div className={`${styles.authFormSection} ${styles.authFormSectionEditable}`}>
+            <h2 className={styles.authTitle}>
+              COMPLETE YOUR PROFILE
+            </h2>
 
           {(formError || error) && (
             <div className={styles.errorMessage} role="alert">
@@ -255,6 +245,23 @@ export default function EditProfile() {
               {loading ? 'UPDATING...' : 'UPDATE PROFILE'}
             </Button>
           </form>
+          </div>
+
+          {/* Right Section - Circular Image Preview */}
+          <div className={styles.circularImagePreviewContainer}>
+            <div className={styles.circularImagePreview}>
+              {profilePreview ? (
+                <img 
+                  src={profilePreview} 
+                  alt="Profile" 
+                />
+              ) : (
+                <div className={styles.circularImagePlaceholder}>
+                  <p>Profile Image</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
       )}

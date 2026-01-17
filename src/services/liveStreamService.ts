@@ -1,3 +1,5 @@
+import { getToken } from './authService';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export const liveStreamService = {
@@ -19,7 +21,7 @@ export const liveStreamService = {
   },
 
   // Get live stream by ID
-  async getLiveStreamById(id) {
+  async getLiveStreamById(id: string) {
     try {
       const response = await fetch(`${API_BASE_URL}/live-streams/${id}`);
       
@@ -35,9 +37,9 @@ export const liveStreamService = {
   },
 
   // Create live stream
-  async createLiveStream(streamData) {
+  async createLiveStream(streamData: any) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
       
       const response = await fetch(`${API_BASE_URL}/live-streams`, {
         method: 'POST',
@@ -61,9 +63,9 @@ export const liveStreamService = {
   },
 
   // Update live stream
-  async updateLiveStream(id, streamData) {
+  async updateLiveStream(id: string, streamData: any) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
       
       const response = await fetch(`${API_BASE_URL}/live-streams/${id}`, {
         method: 'PUT',
@@ -87,9 +89,9 @@ export const liveStreamService = {
   },
 
   // Update viewers count
-  async updateViewers(id, viewers) {
+  async updateViewers(id: string, viewers: number) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
       
       const response = await fetch(`${API_BASE_URL}/live-streams/${id}/viewers`, {
         method: 'PATCH',
@@ -101,21 +103,20 @@ export const liveStreamService = {
       });
       
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to update viewers');
+        throw new Error('Failed to update viewers count');
       }
       
       return await response.json();
     } catch (error) {
-      console.error('Error updating viewers:', error);
+      console.error('Error updating viewers count:', error);
       throw error;
     }
   },
 
   // Delete live stream
-  async deleteLiveStream(id) {
+  async deleteLiveStream(id: string) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
       
       const response = await fetch(`${API_BASE_URL}/live-streams/${id}`, {
         method: 'DELETE',
@@ -136,18 +137,50 @@ export const liveStreamService = {
     }
   },
 
-  // Get live stream statistics
-  async getLiveStreamStats() {
+  // Start live stream
+  async startStream(id: string) {
     try {
-      const response = await fetch(`${API_BASE_URL}/live-streams/stats`);
+      const token = getToken();
+      
+      const response = await fetch(`${API_BASE_URL}/live-streams/${id}/start`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch live stream statistics');
+        throw new Error('Failed to start live stream');
       }
       
       return await response.json();
     } catch (error) {
-      console.error('Error fetching live stream stats:', error);
+      console.error('Error starting live stream:', error);
+      throw error;
+    }
+  },
+
+  // End live stream
+  async endStream(id: string) {
+    try {
+      const token = getToken();
+      
+      const response = await fetch(`${API_BASE_URL}/live-streams/${id}/end`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to end live stream');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error ending live stream:', error);
       throw error;
     }
   },

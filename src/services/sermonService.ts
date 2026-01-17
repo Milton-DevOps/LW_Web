@@ -1,10 +1,22 @@
+import { getToken } from './authService';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+interface SermonParams {
+  [key: string]: string | number | boolean;
+}
+
+interface SermonData {
+  [key: string]: any;
+}
 
 export const sermonService = {
   // Get all sermons with pagination and filtering
-  async getSermons(params = {}) {
+  async getSermons(params: SermonParams = {}) {
     try {
-      const queryString = new URLSearchParams(params).toString();
+      const queryString = new URLSearchParams(
+        Object.entries(params).map(([key, value]) => [key, String(value)])
+      ).toString();
       const response = await fetch(`${API_BASE_URL}/sermons?${queryString}`);
       
       if (!response.ok) {
@@ -19,7 +31,7 @@ export const sermonService = {
   },
 
   // Get sermon by ID
-  async getSermonById(id) {
+  async getSermonById(id: string) {
     try {
       const response = await fetch(`${API_BASE_URL}/sermons/${id}`);
       
@@ -35,9 +47,9 @@ export const sermonService = {
   },
 
   // Create sermon
-  async createSermon(sermonData) {
+  async createSermon(sermonData: SermonData) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
       
       const response = await fetch(`${API_BASE_URL}/sermons`, {
         method: 'POST',
@@ -61,9 +73,9 @@ export const sermonService = {
   },
 
   // Update sermon
-  async updateSermon(id, sermonData) {
+  async updateSermon(id: string, sermonData: SermonData) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
       
       const response = await fetch(`${API_BASE_URL}/sermons/${id}`, {
         method: 'PUT',
@@ -87,9 +99,9 @@ export const sermonService = {
   },
 
   // Delete sermon
-  async deleteSermon(id) {
+  async deleteSermon(id: string) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
       
       const response = await fetch(`${API_BASE_URL}/sermons/${id}`, {
         method: 'DELETE',
@@ -106,22 +118,6 @@ export const sermonService = {
       return await response.json();
     } catch (error) {
       console.error('Error deleting sermon:', error);
-      throw error;
-    }
-  },
-
-  // Get sermon statistics
-  async getSermonStats() {
-    try {
-      const response = await fetch(`${API_BASE_URL}/sermons/stats`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch sermon statistics');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching sermon stats:', error);
       throw error;
     }
   },

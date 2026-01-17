@@ -1,3 +1,5 @@
+import { getToken } from './authService';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 interface SettingsData {
@@ -37,7 +39,7 @@ export const settingsService = {
   // Update settings
   async updateSettings(data: SettingsData): Promise<any> {
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       const response = await fetch(`${API_BASE_URL}/settings`, {
         method: 'PUT',
         headers: {
@@ -62,7 +64,7 @@ export const settingsService = {
   // Reset settings to default
   async resetSettings(): Promise<any> {
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       const response = await fetch(`${API_BASE_URL}/settings/reset`, {
         method: 'POST',
         headers: {

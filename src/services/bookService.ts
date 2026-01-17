@@ -1,10 +1,22 @@
+import { getToken } from './authService';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+interface BookParams {
+  [key: string]: string | number | boolean;
+}
+
+interface BookData {
+  [key: string]: any;
+}
 
 export const bookService = {
   // Get all books with pagination and filtering
-  async getBooks(params = {}) {
+  async getBooks(params: BookParams = {}) {
     try {
-      const queryString = new URLSearchParams(params).toString();
+      const queryString = new URLSearchParams(
+        Object.entries(params).map(([key, value]) => [key, String(value)])
+      ).toString();
       const response = await fetch(`${API_BASE_URL}/books?${queryString}`);
       
       if (!response.ok) {
@@ -19,7 +31,7 @@ export const bookService = {
   },
 
   // Get book by ID
-  async getBookById(id) {
+  async getBookById(id: string) {
     try {
       const response = await fetch(`${API_BASE_URL}/books/${id}`);
       
@@ -35,9 +47,9 @@ export const bookService = {
   },
 
   // Create book
-  async createBook(bookData) {
+  async createBook(bookData: BookData) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
       
       const response = await fetch(`${API_BASE_URL}/books`, {
         method: 'POST',
@@ -61,9 +73,9 @@ export const bookService = {
   },
 
   // Update book
-  async updateBook(id, bookData) {
+  async updateBook(id: string, bookData: BookData) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
       
       const response = await fetch(`${API_BASE_URL}/books/${id}`, {
         method: 'PUT',
@@ -87,9 +99,9 @@ export const bookService = {
   },
 
   // Delete book
-  async deleteBook(id) {
+  async deleteBook(id: string) {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      const token = getToken();
       
       const response = await fetch(`${API_BASE_URL}/books/${id}`, {
         method: 'DELETE',
@@ -113,7 +125,13 @@ export const bookService = {
   // Get book statistics
   async getBookStats() {
     try {
-      const response = await fetch(`${API_BASE_URL}/books/stats`);
+      const token = getToken();
+      
+      const response = await fetch(`${API_BASE_URL}/books/stats`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       
       if (!response.ok) {
         throw new Error('Failed to fetch book statistics');
@@ -121,7 +139,7 @@ export const bookService = {
       
       return await response.json();
     } catch (error) {
-      console.error('Error fetching book stats:', error);
+      console.error('Error fetching book statistics:', error);
       throw error;
     }
   },

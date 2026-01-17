@@ -1,7 +1,7 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 // Register user
-export const registerUser = async (userData: any) => {
+export const registerUser = async (userData: any): Promise<any> => {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/register`, {
       method: 'POST',
@@ -24,7 +24,7 @@ export const registerUser = async (userData: any) => {
 };
 
 // Login user
-export const loginUser = async (credentials: { email: string; password: string }) => {
+export const loginUser = async (credentials: { email: string; password: string }): Promise<any> => {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
@@ -47,7 +47,7 @@ export const loginUser = async (credentials: { email: string; password: string }
 };
 
 // Google authentication
-export const googleAuth = async (idToken: string) => {
+export const googleAuth = async (idToken: string): Promise<any> => {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/google-auth`, {
       method: 'POST',
@@ -70,7 +70,7 @@ export const googleAuth = async (idToken: string) => {
 };
 
 // Request password reset
-export const requestPasswordReset = async (email: string) => {
+export const requestPasswordReset = async (email: string): Promise<any> => {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/request-password-reset`, {
       method: 'POST',
@@ -93,7 +93,7 @@ export const requestPasswordReset = async (email: string) => {
 };
 
 // Verify OTP
-export const verifyOTP = async (email: string, otp: string) => {
+export const verifyOTP = async (email: string, otp: string): Promise<any> => {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
       method: 'POST',
@@ -116,7 +116,7 @@ export const verifyOTP = async (email: string, otp: string) => {
 };
 
 // Reset password
-export const resetPassword = async (email: string, password: string, confirmPassword: string) => {
+export const resetPassword = async (email: string, password: string, confirmPassword: string): Promise<any> => {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
       method: 'POST',
@@ -139,7 +139,7 @@ export const resetPassword = async (email: string, password: string, confirmPass
 };
 
 // Get user profile
-export const getUserProfile = async (token: string) => {
+export const getUserProfile = async (token: string): Promise<any> => {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/profile`, {
       method: 'GET',
@@ -162,7 +162,7 @@ export const getUserProfile = async (token: string) => {
 };
 
 // Update user profile
-export const updateUserProfile = async (token: string, profileData: any) => {
+export const updateUserProfile = async (token: string, profileData: any): Promise<any> => {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/profile`, {
       method: 'PUT',
@@ -186,7 +186,7 @@ export const updateUserProfile = async (token: string, profileData: any) => {
 };
 
 // Save token to localStorage and cookies
-export const saveToken = (token: string) => {
+export const saveToken = (token: string): void => {
   if (typeof window !== 'undefined') {
     localStorage.setItem('authToken', token);
     // Also save to cookies for middleware access
@@ -195,7 +195,7 @@ export const saveToken = (token: string) => {
 };
 
 // Save user data with role to cookies
-export const saveUser = (user: any) => {
+export const saveUser = (user: any): void => {
   if (typeof window !== 'undefined') {
     localStorage.setItem('user', JSON.stringify(user));
     // Save user role to cookies for middleware access
@@ -214,7 +214,7 @@ export const getToken = (): string | null => {
 };
 
 // Remove token from localStorage and cookies
-export const removeToken = () => {
+export const removeToken = (): void => {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
