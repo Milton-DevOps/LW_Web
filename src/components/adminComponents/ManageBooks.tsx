@@ -15,12 +15,8 @@ interface Book {
   status: 'published' | 'draft' | 'archived';
 }
 
-interface ManageBooksProps {
-  colorMode?: 'light' | 'dark';
-}
-
-const ManageBooks: React.FC<ManageBooksProps> = ({ colorMode = 'light' }) => {
-  const colorScheme = colors[colorMode];
+const ManageBooks: React.FC = () => {
+  const colorScheme = colors;
   const [searchQuery, setSearchQuery] = useState('');
   const [books, setBooks] = useState<Book[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -138,6 +134,7 @@ const ManageBooks: React.FC<ManageBooksProps> = ({ colorMode = 'light' }) => {
             setEditingId(null);
             setFormData({ title: '', author: '', isbn: '', category: 'Spirituality', downloadUrl: '', status: 'published' });
           }}
+          variant="primary"
           className="w-full sm:w-auto"
         >
           + Add Book
@@ -146,7 +143,17 @@ const ManageBooks: React.FC<ManageBooksProps> = ({ colorMode = 'light' }) => {
 
       {/* Modal with Blur Background */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', backdropFilter: 'blur(4px)' }}>
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4" 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowForm(false);
+              setEditingId(null);
+              setFormData({ title: '', author: '', isbn: '', category: 'Spirituality', downloadUrl: '', status: 'published' });
+            }
+          }}
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', backdropFilter: 'blur(4px)' }}
+        >
           <div
             className="p-6 rounded-lg shadow-lg space-y-4 w-full max-w-2xl max-h-auto overflow-hidden"
             style={{ backgroundColor: colorScheme.surface }}
@@ -208,7 +215,7 @@ const ManageBooks: React.FC<ManageBooksProps> = ({ colorMode = 'light' }) => {
             </select>
           </div>
           <div className="flex gap-4 mt-6 pt-4 border-t" style={{ borderColor: colorScheme.border }}>
-            <Button onClick={handleAddOrEdit} className="flex-1">
+            <Button onClick={handleAddOrEdit} variant="primary" className="flex-1">
               {editingId ? 'Update' : 'Add'}
             </Button>
             <Button
@@ -217,8 +224,8 @@ const ManageBooks: React.FC<ManageBooksProps> = ({ colorMode = 'light' }) => {
                 setEditingId(null);
                 setFormData({ title: '', author: '', isbn: '', category: 'Spirituality', status: 'published' });
               }}
+              variant="secondary"
               className="flex-1"
-              style={{ backgroundColor: '#999999' }}
             >
               Cancel
             </Button>
@@ -257,7 +264,7 @@ const ManageBooks: React.FC<ManageBooksProps> = ({ colorMode = 'light' }) => {
           <tbody>
             {filteredBooks.map((book) => (
               <tr
-                key={book.id}
+                key={book._id}
                 style={{
                   borderBottom: `1px solid ${colorScheme.border}`,
                   backgroundColor: colorScheme.surface,
@@ -281,15 +288,16 @@ const ManageBooks: React.FC<ManageBooksProps> = ({ colorMode = 'light' }) => {
                   <div className="flex gap-2 justify-center flex-wrap">
                     <Button
                       onClick={() => handleEdit(book)}
+                      variant="tertiary"
+                      size="sm"
                       className="text-xs px-3 py-1"
-                      style={{ backgroundColor: '#f5a623' }}
                     >
                       Edit
                     </Button>
                     <Button
-                      onClick={() => handleDelete(book.id)}
-                      className="text-xs px-3 py-1"
-                      style={{ backgroundColor: '#e74c3c' }}
+                      onClick={() => handleDelete(book._id)}
+                      size="sm"
+                      className="text-xs px-3 py-1 bg-red-600 hover:bg-red-700 text-white"
                     >
                       Delete
                     </Button>

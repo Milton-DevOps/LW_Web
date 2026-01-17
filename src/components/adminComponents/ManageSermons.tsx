@@ -16,17 +16,15 @@ interface Sermon {
   status: 'published' | 'draft';
 }
 
-interface ManageSermonsProps {
-  colorMode?: 'light' | 'dark';
-}
-
-const ManageSermons: React.FC<ManageSermonsProps> = ({ colorMode = 'light' }) => {
-  const colorScheme = colors[colorMode];
+const ManageSermons: React.FC = () => {
+  const colorScheme = colors;
   const [searchQuery, setSearchQuery] = useState('');
   const [sermons, setSermons] = useState<Sermon[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [videoUploadProgress, setVideoUploadProgress] = useState(0);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [formData, setFormData] = useState({
     title: '',
@@ -111,6 +109,64 @@ const ManageSermons: React.FC<ManageSermonsProps> = ({ colorMode = 'light' }) =>
     }
   };
 
+  const handleVideoUpload = async (file: File) => {
+    if (!file) return;
+
+    // Check file size (max 500MB)
+    if (file.size > 500 * 1024 * 1024) {
+      alert('Video file size must be less than 500MB');
+      return;
+    }
+
+    setUploadingVideo(true);
+    setVideoUploadProgress(0);
+
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      formDataUpload.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_SERMONS || 'lwmi_sermons');
+      formDataUpload.append('resource_type', 'video');
+
+      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwmzofj4a';
+      const xhr = new XMLHttpRequest();
+
+      // Track upload progress
+      xhr.upload.addEventListener('progress', (e) => {
+        if (e.lengthComputable) {
+          const percentComplete = (e.loaded / e.total) * 100;
+          setVideoUploadProgress(Math.round(percentComplete));
+        }
+      });
+
+      xhr.addEventListener('load', () => {
+        if (xhr.status === 200) {
+          const response = JSON.parse(xhr.responseText);
+          setFormData(prev => ({
+            ...prev,
+            videoUrl: response.secure_url
+          }));
+          alert('Video uploaded successfully!');
+          setVideoUploadProgress(0);
+        } else {
+          alert('Failed to upload video. Please try again.');
+        }
+        setUploadingVideo(false);
+      });
+
+      xhr.addEventListener('error', () => {
+        alert('Error uploading video. Please check your connection and try again.');
+        setUploadingVideo(false);
+      });
+
+      xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/upload`);
+      xhr.send(formDataUpload);
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload video');
+      setUploadingVideo(false);
+    }
+  };
+
   const openAddModal = () => {
     setShowModal(true);
     setEditingId(null);
@@ -122,21 +178,21 @@ const ManageSermons: React.FC<ManageSermonsProps> = ({ colorMode = 'light' }) =>
   };
 
   return (
-    <div className={styles.container}>
+    <div className="p-6 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className={styles.header}>
-        <h1 className={styles.title}>Manage Sermon Videos</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">Manage Sermon Videos</h1>
         <Button
           onClick={openAddModal}
-          className="w-full sm:w-auto"
-          style={{ backgroundColor: colorScheme.primary, color: colorScheme.text }}
+          variant="primary"
+          className="w-full sm:w-auto px-6 py-2 rounded-lg font-semibold"
         >
           + Add Sermon
         </Button>
       </div>
 
       {/* Search Bar */}
-      <div className={styles.searchInput}>
+      <div className="mb-6">
         <Input
           type="text"
           placeholder="Search sermons by title or speaker..."
@@ -146,72 +202,73 @@ const ManageSermons: React.FC<ManageSermonsProps> = ({ colorMode = 'light' }) =>
       </div>
 
       {/* Sermons Grid */}
-      <div className={styles.gridContainer}>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredSermons.length > 0 && filteredSermons.map((sermon) => (
           <div
             key={sermon._id}
-            className={styles.sermonCard}
-            style={{ backgroundColor: colorScheme.surface }}
+            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
           >
             {/* Video Thumbnail */}
-            <div className={styles.videoContainer}>
+            <div className="relative w-full aspect-video bg-gray-200 flex items-center justify-center group">
               <svg
-                className={styles.video}
-                fill={colorScheme.textSecondary}
+                className="w-12 h-12 text-gray-400"
+                fill="currentColor"
                 viewBox="0 0 24 24"
               >
                 <path d="M8 5v14l11-7z" />
               </svg>
-              <div className={styles.videoOverlay}>
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
                 <a
                   href={sermon.videoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={`Watch sermon: ${sermon.title}`}
                 >
-                  <div className={styles.playButton}>▶</div>
+                  <div className="bg-red-500 text-white rounded-full w-12 h-12 flex items-center justify-center text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    ▶
+                  </div>
                 </a>
               </div>
             </div>
 
             {/* Content */}
-            <div className={styles.sermonInfo}>
-              <div>
-                <h3 className={styles.sermonTitle}>{sermon.title}</h3>
-                <p style={{ color: colorScheme.textSecondary }}>By {sermon.mainSpeaker}</p>
+            <div className="p-4">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-1">{sermon.title}</h3>
+                <p className="text-gray-600 text-sm">By {sermon.mainSpeaker}</p>
               </div>
 
-              <div>
-                <div className={styles.sermonDetails}>
-                  <span className={styles.label} style={{ color: colorScheme.textSecondary }}>Date:</span>
-                  <span>{new Date(sermon.datePreached).toLocaleDateString()}</span>
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-600 text-sm font-medium">Date:</span>
+                  <span className="text-gray-700">{new Date(sermon.datePreached).toLocaleDateString()}</span>
                 </div>
-                <div className={styles.sermonDetails}>
-                  <span className={styles.label} style={{ color: colorScheme.textSecondary }}>Views:</span>
-                  <span>{sermon.views}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-600 text-sm font-medium">Views:</span>
+                  <span className="text-gray-700">{sermon.views}</span>
                 </div>
 
                 <span
-                  className={`${styles.statusBadge} ${
-                    sermon.status === 'published' ? styles.statusPublished : styles.statusDraft
+                  className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                    sermon.status === 'published' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-yellow-100 text-yellow-800'
                   }`}
                 >
                   {sermon.status}
                 </span>
 
-                <div className={styles.actions} style={{ borderColor: colorScheme.border }}>
+                <div className="flex gap-2 pt-2 border-t border-gray-200">
                   <button
                     onClick={() => handleEdit(sermon)}
-                    className={styles.actionButton}
-                    style={{ backgroundColor: '#f5a623', color: 'white' }}
+                    className="flex-1 px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-md font-medium transition-colors text-sm"
                     aria-label={`Edit sermon: ${sermon.title}`}
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(sermon._id)}
-                    className={styles.actionButton}
-                    style={{ backgroundColor: '#e74c3c', color: 'white' }}
+                    className="flex-1 px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md font-medium transition-colors text-sm"
                     aria-label={`Delete sermon: ${sermon.title}`}
                   >
                     Delete
@@ -225,8 +282,8 @@ const ManageSermons: React.FC<ManageSermonsProps> = ({ colorMode = 'light' }) =>
 
       {/* Empty State */}
       {filteredSermons.length === 0 && (
-        <div className={styles.emptyState}>
-          <p className={styles.emptyText} style={{ color: colorScheme.textSecondary }}>
+        <div className="flex items-center justify-center py-12">
+          <p className="text-gray-500 text-lg">
             No sermons found
           </p>
         </div>
@@ -237,173 +294,212 @@ const ManageSermons: React.FC<ManageSermonsProps> = ({ colorMode = 'light' }) =>
         <>
           {/* Modal Backdrop */}
           <div
-            className={styles.modal}
-            onClick={() => {
-              setShowModal(false);
-              setEditingId(null);
-              setFormData({ title: '', mainSpeaker: '', datePreached: '', videoUrl: '', status: 'published' });
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setShowModal(false);
+                setEditingId(null);
+                setFormData({ title: '', mainSpeaker: '', datePreached: '', videoUrl: '', status: 'published' });
+              }
             }}
             role="presentation"
           />
 
           {/* Modal Content */}
           <div
-            className={styles.modalContent}
-            style={{ backgroundColor: colorScheme.surface }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
             role="dialog"
             aria-labelledby="modal-title"
             aria-modal="true"
           >
-            {/* Header */}
-            <div style={{ borderBottom: `1px solid ${colorScheme.border}`, marginBottom: '1rem' }}>
-              <h2 id="modal-title" className={styles.modalHeader}>
-                {editingId ? 'Edit Sermon' : 'Add New Sermon'}
-              </h2>
-              <button
-                onClick={() => {
-                  setShowModal(false);
-                  setEditingId(null);
-                  setFormData({ title: '', mainSpeaker: '', datePreached: '', videoUrl: '', status: 'published' });
-                }}
-                style={{ color: colorScheme.textSecondary }}
-                aria-label="Close modal"
-                className="text-2xl mb-2"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Form Content */}
-            <div className={styles.formGrid}>
-              <div className={styles.formGroup}>
-                <label htmlFor="sermon-title" className={styles.label}>
-                  Sermon Title *
-                </label>
-                <input
-                  id="sermon-title"
-                  type="text"
-                  placeholder="e.g., The Power of Faith"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className={styles.input}
-                  style={{
-                    borderColor: colorScheme.border,
-                    backgroundColor: colorScheme.background,
-                    color: colorScheme.text,
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              {/* Header */}
+              <div className="flex justify-between items-center p-6 border-b border-gray-200 sticky top-0 bg-white">
+                <h2 id="modal-title" className="text-xl font-bold text-gray-800">
+                  {editingId ? 'Edit Sermon' : 'Add New Sermon'}
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowModal(false);
+                    setEditingId(null);
+                    setFormData({ title: '', mainSpeaker: '', datePreached: '', videoUrl: '', status: 'published' });
                   }}
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label htmlFor="main-speaker" className={styles.label}>
-                  Main Speaker *
-                </label>
-                <input
-                  id="main-speaker"
-                  type="text"
-                  placeholder="e.g., Pastor John"
-                  value={formData.mainSpeaker}
-                  onChange={(e) => setFormData({ ...formData, mainSpeaker: e.target.value })}
-                  className={styles.input}
-                  style={{
-                    borderColor: colorScheme.border,
-                    backgroundColor: colorScheme.background,
-                    color: colorScheme.text,
-                  }}
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label htmlFor="date-preached" className={styles.label}>
-                  Date Preached *
-                </label>
-                <input
-                  id="date-preached"
-                  type="date"
-                  value={formData.datePreached}
-                  onChange={(e) => setFormData({ ...formData, datePreached: e.target.value })}
-                  className={styles.input}
-                  style={{
-                    borderColor: colorScheme.border,
-                    backgroundColor: colorScheme.background,
-                    color: colorScheme.text,
-                  }}
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label htmlFor="video-url" className={styles.label}>
-                  Video URL *
-                </label>
-                <input
-                  id="video-url"
-                  type="url"
-                  placeholder="https://example.com/video.mp4"
-                  value={formData.videoUrl}
-                  onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
-                  className={styles.input}
-                  style={{
-                    borderColor: colorScheme.border,
-                    backgroundColor: colorScheme.background,
-                    color: colorScheme.text,
-                  }}
-                  required
-                />
-                <p className={styles.formTip} style={{ color: colorScheme.textSecondary, backgroundColor: colorScheme.border }}>
-                  📌 Tip: Upload your video to Cloudinary, YouTube, or Vimeo and paste the link
-                </p>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label htmlFor="status" className={styles.label}>
-                  Status
-                </label>
-                <select
-                  id="status"
-                  className={styles.select}
-                  style={{
-                    borderColor: colorScheme.border,
-                    backgroundColor: colorScheme.background,
-                    color: colorScheme.text,
-                  }}
-                  value={formData.status}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      status: e.target.value as 'published' | 'draft',
-                    })
-                  }
+                  className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                  aria-label="Close modal"
                 >
-                  <option value="published">Published</option>
-                  <option value="draft">Draft</option>
-                </select>
+                  ✕
+                </button>
               </div>
-            </div>
 
-            {/* Footer Actions */}
-            <div className={styles.formActions} style={{ borderColor: colorScheme.border }}>
-              <button
-                onClick={handleAddOrEdit}
-                disabled={loading}
-                className={styles.primaryButton}
-                style={{ backgroundColor: colorScheme.primary, color: 'white' }}
-              >
-                {loading ? 'Saving...' : editingId ? 'Update Sermon' : 'Add Sermon'}
-              </button>
-              <button
-                onClick={() => {
-                  setShowModal(false);
-                  setEditingId(null);
-                  setFormData({ title: '', mainSpeaker: '', datePreached: '', videoUrl: '', status: 'published' });
-                }}
-                className={styles.secondaryButton}
-                style={{ backgroundColor: colorScheme.secondary, color: 'white' }}
-              >
-                Cancel
-              </button>
+              {/* Form Content */}
+              <div className="p-6">
+                <form className="space-y-3">
+                  {/* Sermon Title and Speaker - Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <Input
+                        id="sermon-title"
+                        type="text"
+                        label="Sermon Title"
+                        placeholder="e.g., The Power of Faith"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Input
+                        id="main-speaker"
+                        type="text"
+                        label="Main Speaker"
+                        placeholder="e.g., Pastor John"
+                        value={formData.mainSpeaker}
+                        onChange={(e) => setFormData({ ...formData, mainSpeaker: e.target.value })}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Date Preached */}
+                  <div>
+                    <Input
+                      id="date-preached"
+                      type="date"
+                      label="Date Preached"
+                      value={formData.datePreached}
+                      onChange={(e) => setFormData({ ...formData, datePreached: e.target.value })}
+                      fullWidth
+                      required
+                    />
+                  </div>
+
+                  {/* Video Upload Section */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Upload Video or Paste URL
+                    </label>
+                    
+                    <div className="space-y-3">
+                      {uploadingVideo ? (
+                        <div className="space-y-2">
+                          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div
+                              className={styles.progressFill}
+                              style={{
+                                width: `${videoUploadProgress}%`,
+                              } as React.CSSProperties}
+                            />
+                          </div>
+                          <p className="text-gray-600 text-xs">
+                            Uploading... {videoUploadProgress}%
+                          </p>
+                        </div>
+                      ) : (
+                        <div
+                          className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-[#cb4154] hover:bg-red-50 transition-colors"
+                          onClick={() => document.getElementById('video-file-input')?.click()}
+                        >
+                          <input
+                            id="video-file-input"
+                            type="file"
+                            accept="video/*"
+                            title="Select video file to upload"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                handleVideoUpload(e.target.files[0]);
+                              }
+                            }}
+                            className="hidden"
+                            disabled={uploadingVideo}
+                          />
+                          <div>
+                            <p className="text-3xl mb-2">🎬</p>
+                            <p className="text-gray-800 font-semibold text-sm mb-1">
+                              Click to upload or drag and drop
+                            </p>
+                            <p className="text-gray-500 text-xs">
+                              MP4, WebM, Ogg (Max 500MB)
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {formData.videoUrl && (
+                        <div className="p-2 bg-green-50 border border-green-200 rounded-lg text-green-700 text-xs">
+                          ✅ Video uploaded successfully
+                        </div>
+                      )}
+
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <div className="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div className="relative flex justify-center text-xs">
+                          <span className="px-2 bg-white text-gray-500">OR</span>
+                        </div>
+                      </div>
+
+                      <Input
+                        id="video-url"
+                        type="url"
+                        placeholder="Paste video URL (YouTube, Vimeo, etc.)"
+                        value={formData.videoUrl}
+                        onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+                        fullWidth
+                      />
+                    </div>
+
+                    <p className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-xs">
+                      📌 Upload directly or paste a link from YouTube, Vimeo, or any video URL
+                    </p>
+                  </div>
+
+                  {/* Status */}
+                  <div>
+                    <label htmlFor="status" className="block text-xs font-medium text-gray-700 mb-1">
+                      Status
+                    </label>
+                    <select
+                      id="status"
+                      className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-[#cb4154] transition-colors bg-white text-gray-900"
+                      value={formData.status}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          status: e.target.value as 'published' | 'draft',
+                        })
+                      }
+                    >
+                      <option value="published">Published</option>
+                      <option value="draft">Draft</option>
+                    </select>
+                  </div>
+                </form>
+              </div>
+
+              {/* Footer Actions */}
+              <div className="flex gap-3 p-6 border-t border-gray-200 bg-white sticky bottom-0">
+                <Button
+                  onClick={handleAddOrEdit}
+                  disabled={loading}
+                  variant="primary"
+                  className="flex-1 text-sm"
+                >
+                  {loading ? 'Saving...' : editingId ? 'Update Sermon' : 'Add Sermon'}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowModal(false);
+                    setEditingId(null);
+                    setFormData({ title: '', mainSpeaker: '', datePreached: '', videoUrl: '', status: 'published' });
+                  }}
+                  variant="secondary"
+                  className="flex-1 text-sm"
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           </div>
         </>

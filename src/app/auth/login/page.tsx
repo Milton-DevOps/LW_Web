@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useGoogleLogin } from '@react-oauth/google';
 import { Button } from '../../../components/Button';
+import { Input } from '../../../components/Input';
 import { colors } from '../../../constants/colors';
 import { useAuth } from '../../../hooks/useAuth';
 import { getToken, saveToken, saveUser } from '../../../services/authService';
@@ -56,7 +57,19 @@ export default function Login() {
 
       saveToken(data.token);
       saveUser(data.user);
-      router.push('/');
+      
+      // Debug logging
+      console.log('Login response:', data);
+      console.log('User role:', data.user?.role);
+      
+      // Role-based navigation
+      if (data.user?.role === 'admin') {
+        console.log('Redirecting to dashboard');
+        router.push('/dashboard');
+      } else {
+        console.log('Redirecting to home');
+        router.push('/');
+      }
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Login failed');
     }
@@ -87,8 +100,12 @@ export default function Login() {
         saveToken(data.token);
         saveUser(data.user);
         
-        // For login, profile is already complete (registered users)
-        router.push('/');
+        // Role-based navigation
+        if (data.user?.role === 'admin') {
+          router.push('/dashboard');
+        } else {
+          router.push('/');
+        }
       } catch (err) {
         setFormError(err instanceof Error ? err.message : 'Google login failed');
       }
@@ -114,37 +131,31 @@ export default function Login() {
           )}
 
           <form className="space-y-3" onSubmit={handleSubmit}>
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Email <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors"
-              />
-            </div>
+            <Input
+              label="Email"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+              fullWidth
+              required
+            />
 
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Password <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors"
-              />
-            </div>
+            <Input
+              label="Password"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+              fullWidth
+              required
+            />
 
             <Link href="/auth/forgot-password" className={styles.primaryLink}>
               <p className="text-xs hover:underline">Forgot password?</p>
             </Link>
 
-            <Button type="submit" fullWidth className="mt-4 text-sm" disabled={loading}>
+            <Button type="submit" fullWidth variant="primary" className="mt-4 text-sm" disabled={loading}>
               {loading ? 'LOGGING IN...' : 'LOGIN'}
             </Button>
           </form>

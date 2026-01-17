@@ -185,10 +185,23 @@ export const updateUserProfile = async (token: string, profileData: any) => {
   }
 };
 
-// Save token to localStorage
+// Save token to localStorage and cookies
 export const saveToken = (token: string) => {
   if (typeof window !== 'undefined') {
     localStorage.setItem('authToken', token);
+    // Also save to cookies for middleware access
+    document.cookie = `auth_token=${token};path=/;max-age=${30 * 24 * 60 * 60};secure;samesite=strict`;
+  }
+};
+
+// Save user data with role to cookies
+export const saveUser = (user: any) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('user', JSON.stringify(user));
+    // Save user role to cookies for middleware access
+    if (user?.role) {
+      document.cookie = `user_role=${user.role};path=/;max-age=${30 * 24 * 60 * 60};secure;samesite=strict`;
+    }
   }
 };
 
@@ -200,18 +213,14 @@ export const getToken = (): string | null => {
   return null;
 };
 
-// Remove token from localStorage
+// Remove token from localStorage and cookies
 export const removeToken = () => {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
-  }
-};
-
-// Save user data
-export const saveUser = (user: any) => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('user', JSON.stringify(user));
+    // Clear cookies
+    document.cookie = 'auth_token=;path=/;max-age=0';
+    document.cookie = 'user_role=;path=/;max-age=0';
   }
 };
 

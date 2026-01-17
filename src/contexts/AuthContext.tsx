@@ -12,6 +12,8 @@ interface User {
   whatsappNumber: string;
   phoneNumber?: string;
   authProvider: string;
+  role?: 'admin' | 'head_of_department' | 'member' | 'user';
+  department?: string;
 }
 
 interface AuthContextType {

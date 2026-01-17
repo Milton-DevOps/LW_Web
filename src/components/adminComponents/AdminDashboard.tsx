@@ -14,14 +14,10 @@ import Settings from './Settings';
 
 type DashboardSection = 'dashboard' | 'sermons' | 'live' | 'users' | 'books' | 'departments' | 'settings';
 
-interface AdminDashboardProps {
-  colorMode?: 'light' | 'dark';
-}
-
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ colorMode = 'light' }) => {
+const AdminDashboard: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeSection, setActiveSection] = useState<DashboardSection>('dashboard');
-  const colorScheme = colors[colorMode];
+  const colorScheme = colors;
   const router = useRouter();
 
   const handleSectionChange = (section: string) => {
@@ -41,19 +37,19 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ colorMode = 'light' }) 
   const renderSection = () => {
     switch (activeSection) {
       case 'sermons':
-        return <ManageSermons colorMode={colorMode} />;
+        return <ManageSermons />;
       case 'live':
-        return <LiveStream colorMode={colorMode} />;
+        return <LiveStream />;
       case 'users':
-        return <ManageUsers colorMode={colorMode} />;
+        return <ManageUsers />;
       case 'books':
-        return <ManageBooks colorMode={colorMode} />;
+        return <ManageBooks />;
       case 'departments':
-        return <ManageDepartments colorMode={colorMode} />;
+        return <ManageDepartments />;
       case 'settings':
-        return <Settings colorMode={colorMode} />;
+        return <Settings />;
       default:
-        return <DashboardOverview colorMode={colorMode} />;
+        return <DashboardOverview />;
     }
   };
 
@@ -63,18 +59,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ colorMode = 'light' }) 
       style={{ backgroundColor: colorScheme.background, color: colorScheme.text }}
     >
       {/* Header */}
-      <Header
-        colorMode={colorMode}
-        onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
-      />
+      <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
 
       {/* Main Content Container */}
-      <div className="flex flex-1 mt-16">
+      <div className="flex flex-1 mt-14 md:mt-16">
         {/* Sidebar */}
         <Sidebar
-          colorMode={colorMode}
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
+
           onNavigate={handleSectionChange}
           activeSection={activeSection}
           onLogout={handleLogout}
@@ -83,14 +74,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ colorMode = 'light' }) 
         {/* Overlay for mobile when sidebar is open */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 lg:hidden z-30 mt-16"
+            className="fixed inset-0 lg:hidden z-30 mt-14 md:mt-16"
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', backdropFilter: 'blur(4px)' }}
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-auto lg:ml-64">
-          <div className="p-4 md:p-6 lg:p-8">
+        <div className="flex-1 overflow-auto w-full lg:ml-64">
+          <div className="p-3 sm:p-4 md:p-6 lg:p-8 max-w-7xl mx-auto w-full">
             {renderSection()}
           </div>
         </div>
@@ -99,12 +91,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ colorMode = 'light' }) 
   );
 };
 
-interface DashboardOverviewProps {
-  colorMode?: 'light' | 'dark';
-}
-
-const DashboardOverview: React.FC<DashboardOverviewProps> = ({ colorMode = 'light' }) => {
-  const colorScheme = colors[colorMode];
+const DashboardOverview: React.FC = () => {
+  const colorScheme = colors;
 
   const stats = [
     { label: 'Total Sermons', value: '24', color: '#cb4154' },

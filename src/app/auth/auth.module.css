@@ -215,12 +215,18 @@
   }
 
   .authImageSection {
-    flex: 0 0 250px;
-    min-height: 250px;
+    flex: 0 0 200px;
+    min-height: 200px;
   }
 
   .authFormSection {
-    padding: 1.5rem;
+    padding: 1.25rem;
+    gap: 1rem;
+  }
+
+  .authTitle {
+    font-size: 1rem;
+    margin-bottom: 1rem;
   }
 }
 

@@ -6,12 +6,12 @@ import { Button } from '../../../components/Button';
 import { Input } from '../../../components/Input';
 import { colors } from '../../../constants/colors';
 import { useAuth } from '../../../hooks/useAuth';
-import { getToken } from '../../../services/authService';
+import { getToken, getUser } from '../../../services/authService';
 import styles from '../auth.module.css';
 
 export default function EditProfile() {
   const router = useRouter();
-  const { user, handleUpdateProfile, loading, error, clearError } = useAuth();
+  const { handleUpdateProfile, loading, error, clearError } = useAuth();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -21,38 +21,74 @@ export default function EditProfile() {
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
   const [formError, setFormError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [originalProfilePicture, setOriginalProfilePicture] = useState<string | null>(null);
 
   useEffect(() => {
     // Redirect if not authenticated
-    if (!getToken()) {
+    const token = getToken();
+    if (!token) {
       router.push('/auth/login');
       return;
     }
 
-    if (user) {
-      setFirstName(user.firstName || '');
-      setLastName(user.lastName || '');
-      setEmail(user.email || '');
-      setWhatsappNumber(user.whatsappNumber || '');
-      setPhoneNumber(user.phoneNumber || '');
-      if (user.profilePicture?.url) {
-        setProfilePreview(user.profilePicture.url);
+    // Get user data from localStorage (async storage)
+    const userData = getUser();
+    
+    if (userData) {
+      setFirstName(userData.firstName || '');
+      setLastName(userData.lastName || '');
+      setEmail(userData.email || '');
+      setWhatsappNumber(userData.whatsappNumber || '');
+      setPhoneNumber(userData.phoneNumber || '');
+      if (userData.profilePicture?.url) {
+        setProfilePreview(userData.profilePicture.url);
+        setOriginalProfilePicture(userData.profilePicture.url);
       }
     }
-  }, [user, router]);
+    
+    setIsLoading(false);
+  }, [router]);
 
   const handleProfilePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setFormError('Profile picture must be less than 5MB');
+        return;
+      }
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setFormError('Please select a valid image file');
+        return;
+      }
+      
       setProfilePicture(file);
+      setFormError('');
 
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfilePreview(reader.result as string);
       };
+      reader.onerror = () => {
+        setFormError('Failed to read image file');
+      };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleRemoveProfilePicture = () => {
+    setProfilePicture(null);
+    setProfilePreview(null);
+  };
+
+  const handleResetProfilePicture = () => {
+    setProfilePicture(null);
+    setProfilePreview(originalProfilePicture);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -84,11 +120,24 @@ export default function EditProfile() {
         phoneNumber: phoneNumber || '',
       };
 
-      if (profilePicture && profilePreview) {
+      // Only include profile picture if it was changed
+      if (profilePicture && profilePreview && profilePreview !== originalProfilePicture) {
         profileData.profilePictureUrl = profilePreview;
       }
 
       await handleUpdateProfile(profileData);
+      
+      // Update stored user data if profile picture was changed
+      if (profileData.profilePictureUrl) {
+        const userData = getUser();
+        if (userData) {
+          userData.profilePicture = { url: profilePreview };
+          const { saveUser } = await import('../../../services/authService');
+          saveUser(userData);
+          setOriginalProfilePicture(profilePreview);
+        }
+      }
+      
       setSuccess(true);
       setTimeout(() => {
         router.push('/');
@@ -100,87 +149,94 @@ export default function EditProfile() {
 
   return (
     <div className={styles.authContainer}>
-      <div className={styles.authCard}>
-        <div className={styles.authCardContent}>
-          {/* Left Section - Form */}
-          <div className={styles.authCardLeft}>
-            <div>
-              <h2 className={styles.authTitle}>
-                COMPLETE YOUR PROFILE
-              </h2>
-              <p className={styles.authSubtitle}>Update your personal information</p>
+      {isLoading ? (
+        <div className={`${styles.authCard} ${styles.authCardWithImage}`}>
+          <div className={styles.authFormSection}>
+            <p className="text-center text-gray-500">Loading your profile...</p>
+          </div>
+        </div>
+      ) : (
+      <div className={`${styles.authCard} ${styles.authCardWithImage}`}>
+        {/* Left Section - Image */}
+        <div className={styles.authImageSection}>
+          {profilePreview ? (
+            <img src={profilePreview} alt="Profile" />
+          ) : (
+            <div className="text-center text-gray-400">
+              <p className="text-sm">Profile Image Preview</p>
+            </div>
+          )}
+        </div>
+
+        {/* Right Section - Form */}
+        <div className={styles.authFormSection}>
+          <h2 className={styles.authTitle}>
+            COMPLETE YOUR PROFILE
+          </h2>
+
+          {(formError || error) && (
+            <div className={styles.errorMessage} role="alert">
+              {formError || error}
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded text-sm">
+              Profile updated successfully! Redirecting...
+            </div>
+          )}
+
+          <form className="space-y-3" onSubmit={handleSubmit}>
+            <div className="grid grid-cols-2 gap-3">
+              <Input
+                label="First Name"
+                type="text"
+                placeholder="First Name"
+                value={firstName}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)}
+                required
+              />
+
+              <Input
+                label="Last Name"
+                type="text"
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)}
+                required
+              />
             </div>
 
-            {(formError || error) && (
-              <div className={styles.errorMessage} role="alert">
-                {formError || error}
-              </div>
-            )}
+            <Input
+              label="Email"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              disabled
+              fullWidth
+            />
 
-            {success && (
-              <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded text-sm">
-                Profile updated successfully! Redirecting...
-              </div>
-            )}
+            <Input
+              label="WhatsApp Number"
+              type="tel"
+              placeholder="+1234567890"
+              value={whatsappNumber}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWhatsappNumber(e.target.value)}
+              fullWidth
+              required
+            />
 
-            <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Input
-                  label="First Name *"
-                  type="text"
-                  placeholder="John"
-                  value={firstName}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)}
-                  fullWidth
-                />
+            <Input
+              label="Phone Number (Optional)"
+              type="tel"
+              placeholder="+1234567890"
+              value={phoneNumber}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhoneNumber(e.target.value)}
+              fullWidth
+            />
 
-                <Input
-                  label="Last Name *"
-                  type="text"
-                  placeholder="Doe"
-                  value={lastName}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)}
-                  fullWidth
-                />
-              </div>
-
-              <Input
-                label="Email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                disabled
-                fullWidth
-              />
-
-              <Input
-                label="WhatsApp Number *"
-                type="tel"
-                placeholder="+1234567890"
-                value={whatsappNumber}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWhatsappNumber(e.target.value)}
-                fullWidth
-              />
-
-              <Input
-                label="Phone Number (Optional)"
-                type="tel"
-                placeholder="+1234567890"
-                value={phoneNumber}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhoneNumber(e.target.value)}
-                fullWidth
-              />
-
-              <Button type="submit" fullWidth className="mt-3" disabled={loading}>
-                {loading ? 'UPDATING...' : 'UPDATE PROFILE'}
-              </Button>
-            </form>
-          </div>
-
-          {/* Right Section - Profile Picture */}
-          <div className={styles.authCardRight}>
-            <div className={styles.fullWidth}>
-              <label className={styles.fileInputLabel}>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">
                 Profile Picture (Optional)
               </label>
               <input
@@ -188,25 +244,20 @@ export default function EditProfile() {
                 title="Profile picture upload"
                 accept="image/*"
                 onChange={handleProfilePictureChange}
-                className={styles.fileInput}
+                className="w-full px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors cursor-pointer"
               />
               {profilePicture && (
-                <p className={styles.fileName}>{profilePicture.name}</p>
+                <p className="text-xs text-gray-600 mt-1">{profilePicture.name}</p>
               )}
             </div>
 
-            {profilePreview && (
-              <div className={styles.profileImageContainer}>
-                <img 
-                  src={profilePreview} 
-                  alt="Profile Preview" 
-                  className={styles.profileImagePreview}
-                />
-              </div>
-            )}
-          </div>
+            <Button type="submit" fullWidth variant="primary" className="mt-4 text-sm" disabled={loading}>
+              {loading ? 'UPDATING...' : 'UPDATE PROFILE'}
+            </Button>
+          </form>
         </div>
       </div>
+      )}
     </div>
   );
 }

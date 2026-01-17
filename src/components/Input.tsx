@@ -26,11 +26,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             text-base
             border-2
             border-gray-300
-            dark:border-gray-600
             bg-white
-            dark:bg-gray-800
             text-gray-900
-            dark:text-white
             placeholder-gray-500
             dark:placeholder-gray-400
             focus:outline-none
@@ -38,7 +35,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             dark:focus:border-[#ff6b7a]
             transition-colors
             duration-200
-            ${error ? 'border-red-500 dark:border-red-400' : ''}
+            ${error ? 'border-red-500' : ''}
             ${className}
           `}
           {...props}

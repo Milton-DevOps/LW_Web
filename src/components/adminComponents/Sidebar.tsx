@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components';
 import { colors } from '@/constants/colors';
+import { useAuthContext } from '@/contexts/AuthContext';
 
 interface SidebarProps {
-  colorMode?: 'light' | 'dark';
   isOpen?: boolean;
   onClose?: () => void;
   onNavigate?: (section: string) => void;
@@ -18,17 +18,19 @@ interface MenuItem {
   label: string;
   id: string;
   badge?: number;
+  roles?: string[]; // If not specified, available to all
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ 
-  colorMode = 'light', 
   isOpen = true, 
   onClose,
   onNavigate,
   activeSection = 'dashboard',
   onLogout
 }) => {
-  const colorScheme = colors[colorMode];
+  const colorScheme = colors;
+  const { user } = useAuthContext();
+  const userRole = user?.role || 'user';
 
   const menuItems: MenuItem[] = [
     {
@@ -48,6 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       ),
       label: 'Manage Sermons',
       id: 'sermons',
+      roles: ['admin', 'head_of_department'],
     },
     {
       icon: (
@@ -58,6 +61,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       ),
       label: 'Live Streaming',
       id: 'live',
+      roles: ['admin', 'head_of_department'],
     },
     {
       icon: (
@@ -67,6 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       ),
       label: 'Manage Users',
       id: 'users',
+      roles: ['admin'],
     },
     {
       icon: (
@@ -76,6 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       ),
       label: 'Manage Books',
       id: 'books',
+      roles: ['admin', 'head_of_department'],
     },
     {
       icon: (
@@ -85,6 +91,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       ),
       label: 'Manage Departments',
       id: 'departments',
+      roles: ['admin'],
     },
     {
       icon: (
@@ -94,8 +101,17 @@ const Sidebar: React.FC<SidebarProps> = ({
       ),
       label: 'Settings',
       id: 'settings',
+      roles: ['admin'],
     },
   ];
+
+  // Filter menu items based on user role
+  const visibleMenuItems = menuItems.filter(item => {
+    // If no roles specified, show to all
+    if (!item.roles) return true;
+    // If roles specified, show only if user role matches
+    return item.roles.includes(userRole);
+  });
 
   const handleNavClick = (id: string) => {
     if (onNavigate) {
@@ -111,8 +127,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     <>
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-16 bottom-0 transition-all duration-300 z-40 overflow-y-auto
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 w-64
+        className={`fixed left-0 top-14 md:top-16 bottom-0 transition-all duration-300 z-40 overflow-y-auto
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 w-48 md:w-56 lg:w-64
         `}
         style={{
           backgroundColor: colorScheme.surface,
@@ -121,7 +137,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       >
         {/* Navigation Menu */}
         <nav className="px-3 py-4 space-y-2">
-          {menuItems.map((item, index) => (
+          {visibleMenuItems.map((item, index) => (
             <button
               key={index}
               onClick={() => handleNavClick(item.id)}
@@ -171,11 +187,8 @@ const Sidebar: React.FC<SidebarProps> = ({
         >
           <Button
             onClick={onLogout}
-            className="w-full"
-            style={{
-              backgroundColor: '#e74c3c',
-              color: '#ffffff',
-            }}
+            fullWidth
+            className="bg-red-600 hover:bg-red-700 text-white"
           >
             🗝 LOGOUT
           </Button>

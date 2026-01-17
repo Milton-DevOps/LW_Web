@@ -31,7 +31,7 @@ export const Footer: React.FC = () => {
                 className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
                 placeholder="Email address"
               />
-              <button className="px-4 py-2 text-sm bg-white border border-gray-300 rounded">Submit</button>
+              <button className="px-4 py-2 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors">Submit</button>
             </form>
 
             <p className="text-xs text-gray-400 mt-4">Clara & Team Ltd. Done by Agency</p>

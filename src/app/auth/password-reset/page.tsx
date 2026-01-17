@@ -75,14 +75,14 @@ export default function PasswordReset() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: colors.light.surface }}>
-      <div className="w-full max-w-sm bg-white border rounded-lg shadow-md p-8" style={{ borderColor: colors.light.border }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: colors.surface }}>
+      <div className="w-full max-w-sm bg-white border rounded-lg shadow-md p-8" style={{ borderColor: colors.border }}>
         {stage === "email" && (
           <>
-            <h2 className="text-center text-xl font-bold mb-2" style={{ color: colors.light.text }}>
+            <h2 className="text-center text-xl font-bold mb-2" style={{ color: colors.text }}>
               RESET PASSWORD
             </h2>
-            <p className="text-center text-sm mb-6" style={{ color: colors.light.textSecondary }}>
+            <p className="text-center text-sm mb-6" style={{ color: colors.textSecondary }}>
               Enter your email address and we&apos;ll send you a code
             </p>
 
@@ -97,13 +97,13 @@ export default function PasswordReset() {
                 required
               />
 
-              <Button type="submit" fullWidth className="mt-3">
+              <Button type="submit" fullWidth variant="primary" className="mt-3">
                 SEND CODE
               </Button>
             </form>
 
             <div className="mt-6 text-center">
-              <Link href="/auth/login" className="text-sm hover:underline" style={{ color: colors.light.primary }}>
+              <Link href="/auth/login" className="text-sm hover:underline" style={{ color: colors.primary }}>
                 Back to login
               </Link>
             </div>
@@ -112,10 +112,10 @@ export default function PasswordReset() {
 
         {stage === "otp" && (
           <>
-            <h2 className="text-center text-xl font-bold mb-2" style={{ color: colors.light.text }}>
+            <h2 className="text-center text-xl font-bold mb-2" style={{ color: colors.text }}>
               VERIFY CODE
             </h2>
-            <p className="text-center text-sm mb-6" style={{ color: colors.light.textSecondary }}>
+            <p className="text-center text-sm mb-6" style={{ color: colors.textSecondary }}>
               We&apos;ve sent a code to <strong>{email}</strong>
             </p>
 
@@ -136,8 +136,8 @@ export default function PasswordReset() {
                     onKeyDown={(e) => handleKeyDown(index, e)}
                     className="w-12 h-12 text-center text-xl font-bold border-2 rounded-lg focus:outline-none transition-colors"
                     style={{
-                      borderColor: digit ? colors.light.primary : colors.light.border,
-                      color: colors.light.text,
+                      borderColor: digit ? colors.primary : colors.border,
+                      color: colors.text,
                     }}
                     placeholder="-"
                   />
@@ -147,14 +147,14 @@ export default function PasswordReset() {
               {/* Timer */}
               <div className="text-center">
                 {timeLeft > 0 ? (
-                  <p className="text-sm" style={{ color: colors.light.textSecondary }}>
+                  <p className="text-sm" style={{ color: colors.textSecondary }}>
                     Code expires in{" "}
-                    <span style={{ color: colors.light.primary, fontWeight: "bold" }}>
+                    <span style={{ color: colors.primary, fontWeight: "bold" }}>
                       {formatTime(timeLeft)}
                     </span>
                   </p>
                 ) : (
-                  <p className="text-sm" style={{ color: colors.light.primary }}>
+                  <p className="text-sm" style={{ color: colors.primary }}>
                     Code expired. Please request a new one.
                   </p>
                 )}
@@ -164,6 +164,7 @@ export default function PasswordReset() {
               <Button
                 type="submit"
                 fullWidth
+                variant="primary"
                 disabled={otp.join("").length !== 6}
                 className={otp.join("").length !== 6 ? "opacity-50 cursor-not-allowed" : ""}
               >
@@ -172,14 +173,14 @@ export default function PasswordReset() {
 
               {/* Resend Section */}
               <div className="text-center">
-                <p className="text-sm" style={{ color: colors.light.textSecondary }}>
+                <p className="text-sm" style={{ color: colors.textSecondary }}>
                   Didn&apos;t receive the code?{" "}
                   <button
                     type="button"
                     onClick={handleResend}
                     disabled={timeLeft > 0}
                     className={`font-medium ${timeLeft > 0 ? "opacity-50 cursor-not-allowed" : ""}`}
-                    style={{ color: colors.light.primary }}
+                    style={{ color: colors.primary }}
                   >
                     Resend
                   </button>
@@ -191,7 +192,7 @@ export default function PasswordReset() {
               <button
                 onClick={handleBackToEmail}
                 className="text-sm hover:underline"
-                style={{ color: colors.light.primary }}
+                style={{ color: colors.primary }}
               >
                 Use different email
               </button>
@@ -204,25 +205,25 @@ export default function PasswordReset() {
             <div className="text-center space-y-4">
               <div
                 className="w-16 h-16 rounded-full flex items-center justify-center mx-auto"
-                style={{ backgroundColor: colors.light.primary }}
+                style={{ backgroundColor: colors.primary }}
               >
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-lg" style={{ color: colors.light.text }}>
+              <h3 className="font-semibold text-lg" style={{ color: colors.text }}>
                 Code Verified!
               </h3>
-              <p className="text-sm" style={{ color: colors.light.textSecondary }}>
+              <p className="text-sm" style={{ color: colors.textSecondary }}>
                 You can now set a new password for your account.
               </p>
               <Link href="/auth/set-new-password" className="block mt-4">
-                <Button fullWidth>SET NEW PASSWORD</Button>
+                <Button fullWidth variant="primary">SET NEW PASSWORD</Button>
               </Link>
             </div>
 
             <div className="mt-6 text-center">
-              <Link href="/auth/login" className="text-sm hover:underline" style={{ color: colors.light.primary }}>
+              <Link href="/auth/login" className="text-sm hover:underline" style={{ color: colors.primary }}>
                 Back to login
               </Link>
             </div>

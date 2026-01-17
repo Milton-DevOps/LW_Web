@@ -22,12 +22,10 @@ interface Department {
   name: string;
 }
 
-interface ManageUsersProps {
-  colorMode?: 'light' | 'dark';
-}
+interface ManageUsersProps {}
 
-const ManageUsers: React.FC<ManageUsersProps> = ({ colorMode = 'light' }) => {
-  const colorScheme = colors[colorMode];
+const ManageUsers: React.FC<ManageUsersProps> = () => {
+  const colorScheme = colors;
   const [searchQuery, setSearchQuery] = useState('');
   const [users, setUsers] = useState<User[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -289,24 +287,26 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ colorMode = 'light' }) => {
           <div
             className="fixed inset-0 z-50"
             style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', backdropFilter: 'blur(4px)' }}
-            onClick={() => {
-              setShowModal(false);
-              setEditingId(null);
-              setFormData({ name: '', email: '', role: 'user', department: '' });
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setShowModal(false);
+                setEditingId(null);
+                setFormData({ name: '', email: '', role: 'user', department: '' });
+              }
             }}
           />
 
           {/* Modal */}
           <div
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md rounded-lg shadow-xl z-50 max-h-96 overflow-hidden"
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 sm:w-full max-w-md rounded-lg shadow-xl z-50 max-h-[85vh] overflow-y-auto"
             style={{ backgroundColor: colorScheme.surface }}
           >
             {/* Header */}
             <div
-              className="px-6 py-4 border-b flex justify-between items-center sticky top-0"
+              className="px-4 sm:px-6 py-4 border-b flex justify-between items-center sticky top-0"
               style={{ borderColor: colorScheme.border, backgroundColor: colorScheme.surface }}
             >
-              <h3 className="text-lg font-bold">
+              <h3 className="text-base sm:text-lg font-bold">
                 {editingId ? 'Edit User' : 'Add New User'}
               </h3>
               <button
@@ -323,31 +323,31 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ colorMode = 'light' }) => {
             </div>
 
             {/* Content */}
-            <div className="px-6 py-4 space-y-4">
+            <div className="px-4 sm:px-6 py-4 space-y-3 sm:space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Full Name *</label>
+                <label className="block text-xs sm:text-sm font-medium mb-2">Full Name *</label>
                 <Input
                   type="text"
-                  placeholder="John Doe"
+                  placeholder="Afegenui Milton"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Email Address *</label>
+                <label className="block text-xs sm:text-sm font-medium mb-2">Email Address *</label>
                 <Input
                   type="email"
-                  placeholder="john@example.com"
+                  placeholder="milton@example.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Role *</label>
+                <label className="block text-xs sm:text-sm font-medium mb-2">Role *</label>
                 <select
-                  className="w-full px-4 py-2 border rounded"
+                  className="w-full px-3 sm:px-4 py-2 text-sm border rounded"
                   style={{
                     borderColor: colorScheme.border,
                     backgroundColor: colorScheme.background,
@@ -371,9 +371,9 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ colorMode = 'light' }) => {
 
               {(formData.role === 'head_of_department' || formData.role === 'member') && (
                 <div>
-                  <label className="block text-sm font-medium mb-2">Department *</label>
+                  <label className="block text-xs sm:text-sm font-medium mb-2">Department *</label>
                   <select
-                    className="w-full px-4 py-2 border rounded"
+                    className="w-full px-3 sm:px-4 py-2 text-sm border rounded"
                     style={{
                       borderColor: colorScheme.border,
                       backgroundColor: colorScheme.background,
@@ -395,13 +395,13 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ colorMode = 'light' }) => {
 
             {/* Footer */}
             <div
-              className="px-6 py-4 border-t flex gap-3 sticky bottom-0"
+              className="px-4 sm:px-6 py-4 border-t flex gap-2 sm:gap-3 flex-col sm:flex-row sticky bottom-0"
               style={{ borderColor: colorScheme.border, backgroundColor: colorScheme.surface }}
             >
               <Button
                 onClick={handleAddOrEdit}
                 disabled={loading}
-                className="flex-1"
+                className="flex-1 text-sm"
                 style={{ backgroundColor: colorScheme.primary }}
               >
                 {loading ? 'Creating...' : editingId ? 'Update User' : 'Create User'}
@@ -412,7 +412,7 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ colorMode = 'light' }) => {
                   setEditingId(null);
                   setFormData({ name: '', email: '', role: 'user', department: '' });
                 }}
-                className="flex-1"
+                className="flex-1 text-sm"
                 style={{ backgroundColor: colorScheme.secondary }}
               >
                 Cancel

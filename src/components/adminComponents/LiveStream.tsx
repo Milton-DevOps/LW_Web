@@ -16,12 +16,8 @@ interface LiveSession {
   viewers: number;
 }
 
-interface LiveStreamProps {
-  colorMode?: 'light' | 'dark';
-}
-
-const LiveStream: React.FC<LiveStreamProps> = ({ colorMode = 'light' }) => {
-  const colorScheme = colors[colorMode];
+const LiveStream: React.FC = () => {
+  const colorScheme = colors;
   const [sessions, setSessions] = useState<LiveSession[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -278,6 +274,7 @@ const LiveStream: React.FC<LiveStreamProps> = ({ colorMode = 'light' }) => {
             role="dialog"
             aria-labelledby="modal-title"
             aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
           >
             <h2 id="modal-title" className={styles.modalTitle}>
               Schedule Live Stream

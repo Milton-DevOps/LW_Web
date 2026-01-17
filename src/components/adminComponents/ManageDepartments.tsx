@@ -16,12 +16,8 @@ interface Department {
   createdAt: string;
 }
 
-interface ManageDepartmentsProps {
-  colorMode?: 'light' | 'dark';
-}
-
-const ManageDepartments: React.FC<ManageDepartmentsProps> = ({ colorMode = 'light' }) => {
-  const colorScheme = colors[colorMode];
+const ManageDepartments: React.FC = () => {
+  const colorScheme = colors;
   const [searchQuery, setSearchQuery] = useState('');
   const [departments, setDepartments] = useState<Department[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -138,7 +134,17 @@ const ManageDepartments: React.FC<ManageDepartmentsProps> = ({ colorMode = 'ligh
 
       {/* Modal with Blur Background */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', backdropFilter: 'blur(4px)' }}>
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowForm(false);
+              setEditingId(null);
+              setFormData({ name: '', description: '', isActive: true });
+            }
+          }}
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', backdropFilter: 'blur(4px)' }}
+        >
           <div
             className="p-6 rounded-lg shadow-lg space-y-4 w-full max-w-2xl max-h-auto overflow-hidden"
             style={{ backgroundColor: colorScheme.surface }}

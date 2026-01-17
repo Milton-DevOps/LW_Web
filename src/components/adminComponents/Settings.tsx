@@ -1,15 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Input } from '@/components';
 import { colors } from '@/constants/colors';
+import { settingsService } from '@/services/settingsService';
 
-interface SettingsProps {
-  colorMode?: 'light' | 'dark';
-}
-
-const Settings: React.FC<SettingsProps> = ({ colorMode = 'light' }) => {
-  const colorScheme = colors[colorMode];
+const Settings: React.FC = () => {
+  const colorScheme = colors;
   const [settings, setSettings] = useState({
     siteName: 'Light World Mission',
     siteEmail: 'admin@lightworldmission.com',
@@ -23,35 +20,87 @@ const Settings: React.FC<SettingsProps> = ({ colorMode = 'light' }) => {
   });
 
   const [isSaved, setIsSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [fetchLoading, setFetchLoading] = useState(true);
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      setFetchLoading(true);
+      const response = await settingsService.getSettings();
+      setSettings({
+        siteName: response.siteName || 'Light World Mission',
+        siteEmail: response.siteEmail || 'admin@lightworldmission.com',
+        phoneNumber: response.phoneNumber || '+1 (555) 123-4567',
+        address: response.address || '123 Church Street, City, State 12345',
+        maxFileUpload: response.maxFileUpload?.toString() || '50',
+        sessionTimeout: response.sessionTimeout?.toString() || '30',
+        enableNotifications: response.enableNotifications ?? true,
+        enableEmails: response.enableEmails ?? true,
+        maintenanceMode: response.maintenanceMode ?? false,
+      });
+    } catch (error) {
+      console.error('Failed to fetch settings:', error);
+      alert('Failed to load settings');
+    } finally {
+      setFetchLoading(false);
+    }
+  };
 
   const handleChange = (field: string, value: any) => {
     setSettings(prev => ({
       ...prev,
       [field]: value,
     }));
-    setIsSaved(false);
   };
 
-  const handleSave = () => {
-    // Save settings to backend
-    console.log('Settings saved:', settings);
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 3000);
+  const handleSave = async () => {
+    if (!settings.siteEmail) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await settingsService.updateSettings({
+        siteName: settings.siteName,
+        siteEmail: settings.siteEmail,
+        phoneNumber: settings.phoneNumber,
+        address: settings.address,
+        maxFileUpload: parseInt(settings.maxFileUpload),
+        sessionTimeout: parseInt(settings.sessionTimeout),
+        enableNotifications: settings.enableNotifications,
+        enableEmails: settings.enableEmails,
+        maintenanceMode: settings.maintenanceMode,
+      });
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 3000);
+      alert('Settings saved successfully!');
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      alert('Failed to save settings');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleReset = () => {
-    // Reset to default
-    setSettings({
-      siteName: 'Light World Mission',
-      siteEmail: 'admin@lightworldmission.com',
-      phoneNumber: '+1 (555) 123-4567',
-      address: '123 Church Street, City, State 12345',
-      maxFileUpload: '50',
-      sessionTimeout: '30',
-      enableNotifications: true,
-      enableEmails: true,
-      maintenanceMode: false,
-    });
+  const handleReset = async () => {
+    if (!confirm('Are you sure you want to reset all settings to defaults?')) return;
+
+    setLoading(true);
+    try {
+      await settingsService.resetSettings();
+      alert('Settings reset to defaults');
+      await fetchSettings();
+    } catch (error) {
+      console.error('Error resetting settings:', error);
+      alert('Failed to reset settings');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

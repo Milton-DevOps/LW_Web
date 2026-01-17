@@ -178,84 +178,63 @@ export default function Register() {
 
           <form className="space-y-3" onSubmit={handleSubmit}>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  First Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="First Name"
-                  value={firstName}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)}
-                  className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors"
-                />
-              </div>
+              <Input
+                label="First Name"
+                type="text"
+                placeholder="First Name"
+                value={firstName}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)}
+                required
+              />
 
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Last Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Last Name"
-                  value={lastName}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)}
-                  className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Email Addresses <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors"
+              <Input
+                label="Last Name"
+                type="text"
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)}
+                required
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                WhatsApp Number (Optional)
-              </label>
-              <input
-                type="tel"
-                placeholder="WhatsApp Number"
-                value={whatsappNumber}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWhatsappNumber(e.target.value)}
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors"
-              />
-            </div>
+            <Input
+              label="Email Addresses"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+              fullWidth
+              required
+            />
 
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Password <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors"
-              />
-            </div>
+            <Input
+              label="WhatsApp Number (Optional)"
+              type="tel"
+              placeholder="WhatsApp Number"
+              value={whatsappNumber}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWhatsappNumber(e.target.value)}
+              fullWidth
+            />
 
-            <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">
-                Confirm Password <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
-                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors"
-              />
-            </div>
+            <Input
+              label="Password"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+              fullWidth
+              required
+            />
+
+            <Input
+              label="Confirm Password"
+              type="password"
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+              fullWidth
+              required
+            />
 
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -273,7 +252,7 @@ export default function Register() {
               )}
             </div>
 
-            <Button type="submit" fullWidth className="mt-4 text-sm" disabled={loading}>
+            <Button type="submit" fullWidth variant="primary" className="mt-4 text-sm" disabled={loading}>
               {loading ? 'REGISTERING...' : 'REGISTER'}
             </Button>
           </form>

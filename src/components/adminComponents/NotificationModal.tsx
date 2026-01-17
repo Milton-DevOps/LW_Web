@@ -16,15 +16,13 @@ interface Notification {
 interface NotificationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  colorMode?: 'light' | 'dark';
 }
 
 const NotificationModal: React.FC<NotificationModalProps> = ({
   isOpen,
   onClose,
-  colorMode = 'light',
 }) => {
-  const colorScheme = colors[colorMode];
+  const colorScheme = colors;
   const [notifications, setNotifications] = React.useState<Notification[]>([
     {
       id: '1',
@@ -87,18 +85,28 @@ const NotificationModal: React.FC<NotificationModalProps> = ({
     <>
       {/* Modal Backdrop */}
       <div
-        className="fixed inset-0 z-50"
-        onClick={onClose}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            onClose();
+          }
+        }}
         style={{ 
           backgroundColor: 'rgba(0, 0, 0, 0.3)',
-          backdropFilter: 'blur(4px)'
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
         }}
       />
 
       {/* Modal */}
       <div
-        className="fixed top-20 right-4 w-full max-w-md max-h-96 rounded-lg shadow-xl overflow-hidden z-50 flex flex-col"
-        style={{ backgroundColor: colorScheme.surface }}
+        className="fixed z-50 w-full max-w-md max-h-96 rounded-lg shadow-xl overflow-hidden flex flex-col"
+        style={{ 
+          backgroundColor: colorScheme.surface,
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}
       >
         {/* Header */}
         <div

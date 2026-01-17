@@ -3,19 +3,18 @@
 import React, { useState } from 'react';
 import { Button, Input } from '@/components';
 import { colors } from '@/constants/colors';
+import styles from './EditProfileModal.module.css';
 
 interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
-  colorMode?: 'light' | 'dark';
 }
 
 const EditProfileModal: React.FC<EditProfileModalProps> = ({
   isOpen,
   onClose,
-  colorMode = 'light',
 }) => {
-  const colorScheme = colors[colorMode];
+  const colorScheme = colors;
   const [profile, setProfile] = useState({
     firstName: 'Robert',
     lastName: 'William',
@@ -25,6 +24,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     bio: 'Admin of Light World Mission',
   });
 
+  const [profilePicture, setProfilePicture] = useState<File | null>(null);
+  const [profilePreview, setProfilePreview] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
 
   const handleChange = (field: string, value: string) => {
@@ -35,8 +36,32 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     setIsSaved(false);
   };
 
+  const handleProfilePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        return;
+      }
+      
+      setProfilePicture(file);
+      setIsSaved(false);
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfilePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSave = () => {
     console.log('Profile saved:', profile);
+    if (profilePicture) {
+      console.log('Profile picture:', profilePicture);
+    }
     setIsSaved(true);
     setTimeout(() => {
       setIsSaved(false);
@@ -50,133 +75,136 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     <>
       {/* Modal Backdrop */}
       <div
-        className="fixed inset-0 z-50"
+        className={styles.backdrop}
         onClick={onClose}
-        style={{ 
-          backgroundColor: 'rgba(0, 0, 0, 0.3)',
-          backdropFilter: 'blur(4px)'
-        }}
       />
 
       {/* Modal */}
-      <div
-        className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md rounded-lg shadow-xl z-50 max-h-96 overflow-hidden"
-        style={{ backgroundColor: colorScheme.surface }}
-      >
+      <div className={styles.modal}>
         {/* Header */}
-        <div
-          className="px-6 py-4 border-b flex justify-between items-center sticky top-0"
-          style={{ borderColor: colorScheme.border, backgroundColor: colorScheme.surface }}
-        >
-          <h3 className="text-lg font-bold">Edit Profile</h3>
+        <div className={styles.header}>
+          <h3 className={styles.headerTitle}>Edit Profile</h3>
           <button
             onClick={onClose}
-            className="text-xl leading-none"
-            style={{ color: colorScheme.textSecondary }}
+            className={styles.closeButton}
           >
             ✕
           </button>
         </div>
 
         {/* Content */}
-        <div className="px-6 py-4 space-y-4">
+        <div className={styles.content}>
           {isSaved && (
-            <div
-              className="p-3 rounded-lg text-center text-sm font-medium"
-              style={{ backgroundColor: '#d4edda', color: '#155724' }}
-            >
+            <div className={styles.successMessage}>
               ✓ Profile saved successfully!
             </div>
           )}
 
           {/* Profile Avatar */}
-          <div className="flex justify-center mb-6">
-            <div
-              className="w-20 h-20 rounded-full flex items-center justify-center text-white font-bold text-2xl"
-              style={{ backgroundColor: colorScheme.primary }}
-            >
-              RW
-            </div>
+          <div className={styles.avatarContainer}>
+            {profilePreview ? (
+              <img 
+                src={profilePreview} 
+                alt="Profile" 
+                className={styles.avatarImage}
+              />
+            ) : (
+              <div className={styles.avatarInitials}>
+                RW
+              </div>
+            )}
           </div>
 
           {/* Form Fields */}
-          <div>
-            <label className="block text-sm font-medium mb-2">First Name</label>
-            <Input
-              type="text"
-              value={profile.firstName}
-              onChange={(e) => handleChange('firstName', e.target.value)}
-            />
-          </div>
+          <form className={styles.form}>
+            <div className={styles.formGrid}>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>First Name</label>
+                <Input
+                  type="text"
+                  value={profile.firstName}
+                  onChange={(e) => handleChange('firstName', e.target.value)}
+                />
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">Last Name</label>
-            <Input
-              type="text"
-              value={profile.lastName}
-              onChange={(e) => handleChange('lastName', e.target.value)}
-            />
-          </div>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>Last Name</label>
+                <Input
+                  type="text"
+                  value={profile.lastName}
+                  onChange={(e) => handleChange('lastName', e.target.value)}
+                />
+              </div>
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">Email</label>
-            <Input
-              type="email"
-              value={profile.email}
-              onChange={(e) => handleChange('email', e.target.value)}
-            />
-          </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Email</label>
+              <Input
+                type="email"
+                value={profile.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">Phone</label>
-            <Input
-              type="tel"
-              value={profile.phone}
-              onChange={(e) => handleChange('phone', e.target.value)}
-            />
-          </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Phone</label>
+              <Input
+                type="tel"
+                value={profile.phone}
+                onChange={(e) => handleChange('phone', e.target.value)}
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">Department</label>
-            <Input
-              type="text"
-              value={profile.department}
-              onChange={(e) => handleChange('department', e.target.value)}
-            />
-          </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Department</label>
+              <Input
+                type="text"
+                value={profile.department}
+                onChange={(e) => handleChange('department', e.target.value)}
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">Bio</label>
-            <textarea
-              className="w-full px-4 py-2 border rounded"
-              style={{
-                borderColor: colorScheme.border,
-                backgroundColor: colorScheme.background,
-                color: colorScheme.text,
-              }}
-              rows={3}
-              value={profile.bio}
-              onChange={(e) => handleChange('bio', e.target.value)}
-            />
-          </div>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Bio</label>
+              <textarea
+                title="Bio"
+                placeholder="Enter your bio"
+                className={styles.textarea}
+                rows={3}
+                value={profile.bio}
+                onChange={(e) => handleChange('bio', e.target.value)}
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>
+                Profile Picture (Optional)
+              </label>
+              <input
+                type="file"
+                title="Profile picture upload"
+                accept="image/*"
+                onChange={handleProfilePictureChange}
+                className={styles.fileInput}
+              />
+              {profilePicture && (
+                <p className={styles.fileName}>{profilePicture.name}</p>
+              )}
+            </div>
+          </form>
         </div>
 
         {/* Footer */}
-        <div
-          className="px-6 py-4 border-t flex gap-3 sticky bottom-0"
-          style={{ borderColor: colorScheme.border, backgroundColor: colorScheme.surface }}
-        >
+        <div className={styles.footer}>
           <Button
             onClick={handleSave}
-            className="flex-1"
-            style={{ backgroundColor: colorScheme.primary }}
+            className={styles.buttonPrimary}
           >
             Save Changes
           </Button>
           <Button
             onClick={onClose}
-            className="flex-1"
-            style={{ backgroundColor: colorScheme.secondary }}
+            className={styles.buttonSecondary}
           >
             Cancel
           </Button>
