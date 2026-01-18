@@ -57,7 +57,7 @@ export const Carousel: React.FC<CarouselProps> = ({
   }, [currentIndex, autoPlay, autoPlayInterval]);
 
   if (items.length === 0) {
-    return <div className="w-full h-96 bg-gray-200 dark:bg-gray-800 flex items-center justify-center">No items to display</div>;
+    return <div className="w-full h-96 bg-gray-200 flex items-center justify-center">No items to display</div>;
   }
 
   const currentItem = items[currentIndex];
@@ -65,7 +65,7 @@ export const Carousel: React.FC<CarouselProps> = ({
   return (
     <div className="relative w-full overflow-hidden">
       {/* Main Carousel Container */}
-      <div className="relative w-full h-[90vh] sm:h-[600px] md:h-[750px] lg:h-[900px] bg-gray-900">
+      <div className="relative w-full h-[80vh] bg-gray-200">
         {/* Slides */}
         {items.map((item, index) => (
           <div

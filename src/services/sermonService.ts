@@ -50,6 +50,13 @@ export const sermonService = {
   async createSermon(sermonData: SermonData) {
     try {
       const token = getToken();
+      console.log('[SERMON] createSermon: token available:', !!token);
+      console.log('[SERMON] createSermon: token value:', token ? `${token.substring(0, 20)}...` : 'NULL');
+      
+      if (!token) {
+        console.error('[SERMON] createSermon: No token found! Cannot create sermon.');
+        throw new Error('Authentication required. Please log in again.');
+      }
       
       const response = await fetch(`${API_BASE_URL}/sermons`, {
         method: 'POST',
@@ -118,6 +125,61 @@ export const sermonService = {
       return await response.json();
     } catch (error) {
       console.error('Error deleting sermon:', error);
+      throw error;
+    }
+  },
+
+  // Upload sermon video
+  async uploadVideo(file: File, onProgress?: (progress: number) => void) {
+    try {
+      const token = getToken();
+      const formData = new FormData();
+      formData.append('video', file);
+
+      const xhr = new XMLHttpRequest();
+
+      if (onProgress) {
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const percentComplete = Math.round((e.loaded / e.total) * 100);
+            onProgress(percentComplete);
+          }
+        });
+      }
+
+      return new Promise((resolve, reject) => {
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            const response = JSON.parse(xhr.responseText);
+            if (response.success) {
+              resolve(response);
+            } else {
+              reject(new Error(response.message || 'Video upload failed'));
+            }
+          } else {
+            try {
+              const error = JSON.parse(xhr.responseText);
+              reject(new Error(error.message || 'Video upload failed'));
+            } catch {
+              reject(new Error(`Video upload failed with status ${xhr.status}`));
+            }
+          }
+        });
+
+        xhr.addEventListener('error', () => {
+          reject(new Error('Network error during video upload'));
+        });
+
+        xhr.addEventListener('abort', () => {
+          reject(new Error('Video upload was cancelled'));
+        });
+
+        xhr.open('POST', `${API_BASE_URL}/sermons/upload/video`);
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+        xhr.send(formData);
+      });
+    } catch (error) {
+      console.error('Error uploading sermon video:', error);
       throw error;
     }
   },

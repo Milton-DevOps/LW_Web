@@ -70,7 +70,12 @@ const LiveStream: React.FC = () => {
       setShowModal(false);
     } catch (error) {
       console.error('Error:', error);
-      alert(error instanceof Error ? error.message : 'An error occurred. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred. Please try again.';
+      alert(errorMessage);
+      // If auth error, redirect to login
+      if (errorMessage.includes('session has expired') || errorMessage.includes('Authentication required')) {
+        window.location.href = '/auth/login';
+      }
     } finally {
       setLoading(false);
     }
@@ -84,7 +89,12 @@ const LiveStream: React.FC = () => {
         await fetchSessions();
       } catch (error) {
         console.error('Error:', error);
-        alert(error instanceof Error ? error.message : 'Failed to delete live stream');
+        const errorMessage = error instanceof Error ? error.message : 'Failed to delete live stream';
+        alert(errorMessage);
+        // If auth error, redirect to login
+        if (errorMessage.includes('session has expired') || errorMessage.includes('Authentication required')) {
+          window.location.href = '/auth/login';
+        }
       }
     }
   };

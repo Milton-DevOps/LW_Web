@@ -2,21 +2,25 @@ import { getToken } from './authService';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
-interface SettingsData {
-  siteName?: string;
-  siteEmail?: string;
-  phoneNumber?: string;
-  address?: string;
-  maxFileUpload?: number;
-  sessionTimeout?: number;
-  enableNotifications?: boolean;
-  enableEmails?: boolean;
-  maintenanceMode?: boolean;
+interface Settings {
+  _id?: string;
+  siteName: string;
+  siteEmail: string;
+  phoneNumber: string;
+  address: string;
+  maxFileUpload: number;
+  sessionTimeout: number;
+  enableNotifications: boolean;
+  enableEmails: boolean;
+  maintenanceMode: boolean;
+  updatedBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export const settingsService = {
-  // Get current settings
-  async getSettings(): Promise<any> {
+  // Get settings
+  async getSettings(): Promise<Settings> {
     try {
       const response = await fetch(`${API_BASE_URL}/settings`, {
         method: 'GET',
@@ -37,21 +41,29 @@ export const settingsService = {
   },
 
   // Update settings
-  async updateSettings(data: SettingsData): Promise<any> {
+  async updateSettings(settings: Partial<Settings>): Promise<{ message: string; settings: Settings }> {
     try {
       const token = getToken();
+
+      if (!token) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
+
       const response = await fetch(`${API_BASE_URL}/settings`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(settings),
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to update settings');
+        const data = await response.json();
+        if (response.status === 401) {
+          throw new Error('Unauthorized. Please log in again.');
+        }
+        throw new Error(data.message || 'Failed to update settings');
       }
 
       return await response.json();
@@ -62,9 +74,14 @@ export const settingsService = {
   },
 
   // Reset settings to default
-  async resetSettings(): Promise<any> {
+  async resetSettings(): Promise<{ message: string; settings: Settings }> {
     try {
       const token = getToken();
+
+      if (!token) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
+
       const response = await fetch(`${API_BASE_URL}/settings/reset`, {
         method: 'POST',
         headers: {
@@ -74,8 +91,11 @@ export const settingsService = {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to reset settings');
+        const data = await response.json();
+        if (response.status === 401) {
+          throw new Error('Unauthorized. Please log in again.');
+        }
+        throw new Error(data.message || 'Failed to reset settings');
       }
 
       return await response.json();

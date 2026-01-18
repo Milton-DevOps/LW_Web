@@ -2,11 +2,13 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "../../../components/Button";
 import { colors } from "../../../constants/colors";
 import styles from '../utilities.module.css';
 
 export default function OTP() {
+  const router = useRouter();
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timeLeft, setTimeLeft] = useState(120);
   const [verified, setVerified] = useState(false);
@@ -61,6 +63,12 @@ export default function OTP() {
   return (
     <div className={`min-h-screen flex items-center justify-center ${styles.bgSurface}`}>
       <div className={`w-full max-w-sm bg-white border rounded-lg shadow-md p-8 ${styles.bgBorder}`}>
+          <button
+            onClick={() => router.back()}
+            className="mb-4 flex items-center text-[#cb4154] hover:text-[#a83444] transition-colors"
+          >
+            <span className="mr-2">←</span> Back
+          </button>
         <h2 className={`text-center text-xl font-bold mb-2 ${styles.textDarkColor}`}>VERIFY OTP</h2>
         <p className={`text-center text-sm mb-6 ${styles.textSecondaryColor}`}>
           We&apos;ve sent a one-time password to your email

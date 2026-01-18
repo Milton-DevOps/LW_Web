@@ -122,47 +122,24 @@ const ManageSermons: React.FC = () => {
     setVideoUploadProgress(0);
 
     try {
-      const formDataUpload = new FormData();
-      formDataUpload.append('file', file);
-      formDataUpload.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_SERMONS || 'lwmi_sermons');
-      formDataUpload.append('resource_type', 'video');
-
-      const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwmzofj4a';
-      const xhr = new XMLHttpRequest();
-
-      // Track upload progress
-      xhr.upload.addEventListener('progress', (e) => {
-        if (e.lengthComputable) {
-          const percentComplete = (e.loaded / e.total) * 100;
-          setVideoUploadProgress(Math.round(percentComplete));
-        }
+      const response = await sermonService.uploadVideo(file, (progress) => {
+        setVideoUploadProgress(progress);
       });
 
-      xhr.addEventListener('load', () => {
-        if (xhr.status === 200) {
-          const response = JSON.parse(xhr.responseText);
-          setFormData(prev => ({
-            ...prev,
-            videoUrl: response.secure_url
-          }));
-          alert('Video uploaded successfully!');
-          setVideoUploadProgress(0);
-        } else {
-          alert('Failed to upload video. Please try again.');
-        }
-        setUploadingVideo(false);
-      });
-
-      xhr.addEventListener('error', () => {
-        alert('Error uploading video. Please check your connection and try again.');
-        setUploadingVideo(false);
-      });
-
-      xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/upload`);
-      xhr.send(formDataUpload);
+      if (response.success) {
+        setFormData(prev => ({
+          ...prev,
+          videoUrl: response.videoUrl
+        }));
+        alert('Video uploaded successfully!');
+        setVideoUploadProgress(0);
+      } else {
+        alert(response.message || 'Failed to upload video');
+      }
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Failed to upload video');
+      alert(error instanceof Error ? error.message : 'Failed to upload video. Please try again.');
+    } finally {
       setUploadingVideo(false);
     }
   };

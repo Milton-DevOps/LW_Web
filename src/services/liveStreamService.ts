@@ -41,6 +41,10 @@ export const liveStreamService = {
     try {
       const token = getToken();
       
+      if (!token) {
+        throw new Error('Authentication required. Please log in again.');
+      }
+      
       const response = await fetch(`${API_BASE_URL}/live-streams`, {
         method: 'POST',
         headers: {
@@ -52,6 +56,9 @@ export const liveStreamService = {
       
       if (!response.ok) {
         const error = await response.json();
+        if (response.status === 401) {
+          throw new Error('Your session has expired. Please log in again.');
+        }
         throw new Error(error.message || 'Failed to create live stream');
       }
       
@@ -67,6 +74,10 @@ export const liveStreamService = {
     try {
       const token = getToken();
       
+      if (!token) {
+        throw new Error('Authentication required. Please log in again.');
+      }
+      
       const response = await fetch(`${API_BASE_URL}/live-streams/${id}`, {
         method: 'PUT',
         headers: {
@@ -78,6 +89,9 @@ export const liveStreamService = {
       
       if (!response.ok) {
         const error = await response.json();
+        if (response.status === 401) {
+          throw new Error('Your session has expired. Please log in again.');
+        }
         throw new Error(error.message || 'Failed to update live stream');
       }
       
@@ -118,6 +132,10 @@ export const liveStreamService = {
     try {
       const token = getToken();
       
+      if (!token) {
+        throw new Error('Authentication required. Please log in again.');
+      }
+      
       const response = await fetch(`${API_BASE_URL}/live-streams/${id}`, {
         method: 'DELETE',
         headers: {
@@ -127,6 +145,9 @@ export const liveStreamService = {
       
       if (!response.ok) {
         const error = await response.json();
+        if (response.status === 401) {
+          throw new Error('Your session has expired. Please log in again.');
+        }
         throw new Error(error.message || 'Failed to delete live stream');
       }
       

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   loginUser,
   registerUser,
@@ -17,21 +17,59 @@ import {
 export const useAuth = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [user, setUser] = useState(getUser());
-  const [token, setToken] = useState(getToken());
+  const [user, setUser] = useState<any>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Initialize token and user on mount
+  useEffect(() => {
+    const initializeAuth = () => {
+      console.log('[useAuth] Initializing auth...');
+      const savedToken = getToken();
+      const savedUser = getUser();
+      console.log('[useAuth] Initialization complete:', {
+        hasToken: !!savedToken,
+        hasUser: !!savedUser,
+        userId: savedUser?.id,
+        userRole: savedUser?.role,
+      });
+      setToken(savedToken);
+      setUser(savedUser);
+      setIsInitialized(true);
+    };
+
+    initializeAuth();
+
+    // Listen for storage changes in other tabs
+    const handleStorageChange = (e: StorageEvent) => {
+      console.log('[useAuth] Storage event:', e.key);
+      if (e.key === 'authToken' || e.key === 'user') {
+        initializeAuth();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   const handleLogin = useCallback(async (credentials: { email: string; password: string }) => {
     setLoading(true);
     setError('');
     try {
+      console.log('[useAuth] handleLogin: Starting login');
       const response = await loginUser(credentials);
+      console.log('[useAuth] handleLogin: Got response, saving token and user');
       saveToken(response.token);
       saveUser(response.user);
+      console.log('[useAuth] handleLogin: Setting state');
       setToken(response.token);
       setUser(response.user);
+      console.log('[useAuth] handleLogin: State set, token:', response.token ? 'YES' : 'NO', 'user:', response.user?.id ? 'YES' : 'NO');
+      setError('');
       return response;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
+      console.error('[useAuth] handleLogin error:', errorMessage);
       setError(errorMessage);
       throw err;
     } finally {

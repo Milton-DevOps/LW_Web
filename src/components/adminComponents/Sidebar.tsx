@@ -136,7 +136,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         }}
       >
         {/* Navigation Menu */}
-        <nav className="px-3 py-4 space-y-2">
+        <nav className="hidden lg:flex flex-col space-y-1 py-2 sm:py-3">
           {visibleMenuItems.map((item, index) => (
             <button
               key={index}

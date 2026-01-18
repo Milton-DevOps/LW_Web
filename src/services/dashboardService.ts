@@ -45,13 +45,33 @@ interface DashboardStats {
   departments: DepartmentStats;
 }
 
+// Helper function to get headers with token
+const getAuthHeaders = () => {
+  const token = getToken();
+  
+  if (!token) {
+    throw new Error('No authentication token found. Please log in again.');
+  }
+
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+  };
+};
+
 export const dashboardService = {
   // Get sermon statistics
   async getSermonStats(): Promise<{ stats: SermonStats }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sermons/stats`);
+      const response = await fetch(`${API_BASE_URL}/sermons/stats`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Unauthorized. Please log in again.');
+        }
         throw new Error('Failed to fetch sermon stats');
       }
 
@@ -65,9 +85,15 @@ export const dashboardService = {
   // Get book statistics
   async getBookStats(): Promise<{ stats: BookStats }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/books/stats`);
+      const response = await fetch(`${API_BASE_URL}/books/stats`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Unauthorized. Please log in again.');
+        }
         throw new Error('Failed to fetch book stats');
       }
 
@@ -81,9 +107,15 @@ export const dashboardService = {
   // Get live stream statistics
   async getLiveStreamStats(): Promise<{ stats: LiveStreamStats }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/live-streams/stats`);
+      const response = await fetch(`${API_BASE_URL}/live-streams/stats`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Unauthorized. Please log in again.');
+        }
         throw new Error('Failed to fetch live stream stats');
       }
 
@@ -100,16 +132,34 @@ export const dashboardService = {
       const token = getToken();
 
       if (!token) {
-        throw new Error('No authentication token found');
+        console.warn('[Dashboard] No token available for getUserStats');
+        throw new Error('No authentication token found. Please log in again.');
       }
 
+      console.log('[Dashboard] Fetching user stats with token:', token.substring(0, 10) + '...');
+
       const response = await fetch(`${API_BASE_URL}/auth/admin/users?limit=100&page=1`, {
+        method: 'GET',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
       });
 
+      console.log('[Dashboard] User stats response status:', response.status);
+
       if (!response.ok) {
+        const errorData = await response.text();
+        console.error('[Dashboard] User stats error response:', errorData);
+        
+        if (response.status === 401) {
+          // Token might be invalid or expired
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('user');
+          document.cookie = 'auth_token=;path=/;max-age=0';
+          document.cookie = 'user_role=;path=/;max-age=0';
+          throw new Error('Unauthorized. Please log in again.');
+        }
         throw new Error('Failed to fetch user stats');
       }
 
@@ -134,9 +184,15 @@ export const dashboardService = {
   // Get department statistics
   async getDepartmentStats(): Promise<{ stats: DepartmentStats }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/departments/stats`);
+      const response = await fetch(`${API_BASE_URL}/departments/stats`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Unauthorized. Please log in again.');
+        }
         throw new Error('Failed to fetch department stats');
       }
 

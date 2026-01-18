@@ -24,6 +24,19 @@
 
 .textDark {
   color: #1a1a1a;
+  font-size: 1.875rem; /* Mobile: text-3xl */
+}
+
+@media (min-width: 640px) {
+  .textDark {
+    font-size: 2.25rem; /* sm: text-4xl */
+  }
+}
+
+@media (min-width: 1024px) {
+  .textDark {
+    font-size: 3rem; /* lg: text-5xl */
+  }
 }
 
 .textSecondary {
@@ -57,5 +70,17 @@
 }
 
 .paddingRem {
-  padding: 2rem;
+  padding: 1rem; /* Mobile first */
+}
+
+@media (min-width: 640px) {
+  .paddingRem {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .paddingRem {
+    padding: 2rem;
+  }
 }

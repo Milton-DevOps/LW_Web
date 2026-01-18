@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { colors } from '@/constants/colors';
 import { dashboardService } from '@/services/dashboardService';
-import { getToken, getUser } from '@/services/authService';
+import { useAuthContext } from '@/contexts/AuthContext';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import ManageSermons from './ManageSermons';
@@ -62,9 +62,11 @@ const AdminDashboard: React.FC = () => {
   };
 
   const handleLogout = () => {
-    // Clear token and redirect to login
+    // Clear token and user data from all storage
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
+    document.cookie = 'auth_token=;path=/;max-age=0';
+    document.cookie = 'user_role=;path=/;max-age=0';
     router.push('/auth/login');
   };
 
@@ -126,19 +128,41 @@ const AdminDashboard: React.FC = () => {
 
 const DashboardOverview: React.FC = () => {
   const colorScheme = colors;
+  const { token, user, loading: authLoading } = useAuthContext();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
+    // Wait for auth context to initialize
+    if (authLoading) {
+      return;
+    }
+
     const fetchDashboardStats = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        const token = getToken();
+        console.log('[DashboardOverview] Token available:', !!token);
+        console.log('[DashboardOverview] User role:', user?.role);
+        
         if (!token) {
-          setError('No authentication token found');
+          setError('Authentication required. Please log in again.');
+          // Redirect to login
+          setTimeout(() => {
+            router.push('/auth/login');
+          }, 1000);
+          return;
+        }
+
+        if (user?.role !== 'admin') {
+          setError('Admin access required. You do not have permission to access this page.');
+          // Redirect to home
+          setTimeout(() => {
+            router.push('/');
+          }, 2000);
           return;
         }
 
@@ -146,14 +170,22 @@ const DashboardOverview: React.FC = () => {
         setStats(dashboardStats);
       } catch (err) {
         console.error('Error fetching dashboard stats:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load dashboard statistics');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load dashboard statistics';
+        setError(errorMessage);
+        
+        // If unauthorized, redirect to login
+        if (errorMessage.includes('Unauthorized')) {
+          setTimeout(() => {
+            router.push('/auth/login');
+          }, 2000);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchDashboardStats();
-  }, []);
+  }, [token, user, router, authLoading]);
 
   const statCards = [
     {
@@ -205,6 +237,17 @@ const DashboardOverview: React.FC = () => {
       icon: '🏢',
     },
   ];
+
+  // Show loading while auth is initializing
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-xl">Loading authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

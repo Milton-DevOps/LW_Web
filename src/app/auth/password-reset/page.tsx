@@ -2,15 +2,22 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "../../../components/Button";
 import { Input } from "../../../components/Input";
 import { colors } from "../../../constants/colors";
+import { requestPasswordReset, verifyOTP, resetPassword } from "../../../services/authService";
 
 export default function PasswordReset() {
-  const [stage, setStage] = useState<"email" | "otp" | "success">("email");
+  const router = useRouter();
+  const [stage, setStage] = useState<"email" | "otp" | "newPassword" | "success">("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [timeLeft, setTimeLeft] = useState(120);
+  const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -20,11 +27,36 @@ export default function PasswordReset() {
     }
   }, [timeLeft, stage]);
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email.trim()) {
-      setStage("otp");
-      inputRefs.current[0]?.focus();
+    setFormError("");
+    setLoading(true);
+
+    if (!email.trim()) {
+      setFormError("Please enter your email");
+      setLoading(false);
+      return;
+    }
+
+    if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+      setFormError("Please enter a valid email");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await requestPasswordReset(email);
+      if (response.success) {
+        setStage("otp");
+        setTimeLeft(120);
+        inputRefs.current[0]?.focus();
+      } else {
+        setFormError(response.message || "Failed to send code");
+      }
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Failed to send code");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -47,24 +79,95 @@ export default function PasswordReset() {
     }
   };
 
-  const handleOtpSubmit = (e: React.FormEvent) => {
+  const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError("");
+    setLoading(true);
+
     const otpValue = otp.join("");
-    if (otpValue.length === 6) {
-      setStage("success");
+    if (otpValue.length !== 6) {
+      setFormError("Please enter a valid 6-digit code");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await verifyOTP(email, otpValue);
+      if (response.success) {
+        setStage("newPassword");
+      } else {
+        setFormError(response.message || "Failed to verify code");
+      }
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Failed to verify code");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleResend = () => {
-    setOtp(["", "", "", "", "", ""]);
-    setTimeLeft(120);
-    inputRefs.current[0]?.focus();
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError("");
+    setLoading(true);
+
+    if (!newPassword || !confirmPassword) {
+      setFormError("Please fill in all fields");
+      setLoading(false);
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setFormError("Password must be at least 6 characters");
+      setLoading(false);
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setFormError("Passwords do not match");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await resetPassword(email, newPassword, confirmPassword);
+      if (response.success) {
+        setStage("success");
+      } else {
+        setFormError(response.message || "Failed to reset password");
+      }
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Failed to reset password");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setFormError("");
+    setLoading(true);
+    try {
+      const response = await requestPasswordReset(email);
+      if (response.success) {
+        setOtp(["", "", "", "", "", ""]);
+        setTimeLeft(120);
+        inputRefs.current[0]?.focus();
+      } else {
+        setFormError(response.message || "Failed to resend code");
+      }
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Failed to resend code");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleBackToEmail = () => {
     setEmail("");
     setOtp(["", "", "", "", "", ""]);
+    setNewPassword("");
+    setConfirmPassword("");
     setTimeLeft(120);
+    setFormError("");
     setStage("email");
   };
 
@@ -79,12 +182,24 @@ export default function PasswordReset() {
       <div className="w-full max-w-sm bg-white border rounded-lg shadow-md p-8" style={{ borderColor: colors.border }}>
         {stage === "email" && (
           <>
+            <button
+              onClick={() => router.back()}
+              className="mb-4 flex items-center text-[#cb4154] hover:text-[#a83444] transition-colors"
+            >
+              <span className="mr-2">←</span> Back
+            </button>
             <h2 className="text-center text-xl font-bold mb-2" style={{ color: colors.text }}>
               RESET PASSWORD
             </h2>
             <p className="text-center text-sm mb-6" style={{ color: colors.textSecondary }}>
               Enter your email address and we&apos;ll send you a code
             </p>
+
+            {formError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-600 text-sm" role="alert">
+                {formError}
+              </div>
+            )}
 
             <form className="space-y-4" onSubmit={handleEmailSubmit}>
               <Input
@@ -97,8 +212,8 @@ export default function PasswordReset() {
                 required
               />
 
-              <Button type="submit" fullWidth variant="primary" className="mt-3">
-                SEND CODE
+              <Button type="submit" fullWidth variant="primary" className="mt-3" disabled={loading}>
+                {loading ? "SENDING..." : "SEND CODE"}
               </Button>
             </form>
 
@@ -118,6 +233,12 @@ export default function PasswordReset() {
             <p className="text-center text-sm mb-6" style={{ color: colors.textSecondary }}>
               We&apos;ve sent a code to <strong>{email}</strong>
             </p>
+
+            {formError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-600 text-sm" role="alert">
+                {formError}
+              </div>
+            )}
 
             <form className="space-y-6" onSubmit={handleOtpSubmit}>
               {/* OTP Input Fields */}
@@ -165,10 +286,10 @@ export default function PasswordReset() {
                 type="submit"
                 fullWidth
                 variant="primary"
-                disabled={otp.join("").length !== 6}
-                className={otp.join("").length !== 6 ? "opacity-50 cursor-not-allowed" : ""}
+                disabled={otp.join("").length !== 6 || loading}
+                className={otp.join("").length !== 6 || loading ? "opacity-50 cursor-not-allowed" : ""}
               >
-                VERIFY CODE
+                {loading ? "VERIFYING..." : "VERIFY CODE"}
               </Button>
 
               {/* Resend Section */}
@@ -178,8 +299,8 @@ export default function PasswordReset() {
                   <button
                     type="button"
                     onClick={handleResend}
-                    disabled={timeLeft > 0}
-                    className={`font-medium ${timeLeft > 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+                    disabled={timeLeft > 0 || loading}
+                    className={`font-medium ${timeLeft > 0 || loading ? "opacity-50 cursor-not-allowed" : ""}`}
                     style={{ color: colors.primary }}
                   >
                     Resend
@@ -200,6 +321,59 @@ export default function PasswordReset() {
           </>
         )}
 
+        {stage === "newPassword" && (
+          <>
+            <h2 className="text-center text-xl font-bold mb-2" style={{ color: colors.text }}>
+              SET NEW PASSWORD
+            </h2>
+            <p className="text-center text-sm mb-6" style={{ color: colors.textSecondary }}>
+              Enter your new password
+            </p>
+
+            {formError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-600 text-sm" role="alert">
+                {formError}
+              </div>
+            )}
+
+            <form className="space-y-4" onSubmit={handlePasswordSubmit}>
+              <Input
+                label="New Password"
+                type="password"
+                placeholder="Enter new password"
+                value={newPassword}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
+                fullWidth
+                required
+              />
+
+              <Input
+                label="Confirm Password"
+                type="password"
+                placeholder="Confirm password"
+                value={confirmPassword}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
+                fullWidth
+                required
+              />
+
+              <Button type="submit" fullWidth variant="primary" disabled={loading}>
+                {loading ? "RESETTING..." : "RESET PASSWORD"}
+              </Button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <button
+                onClick={handleBackToEmail}
+                className="text-sm hover:underline"
+                style={{ color: colors.primary }}
+              >
+                Back to email
+              </button>
+            </div>
+          </>
+        )}
+
         {stage === "success" && (
           <>
             <div className="text-center space-y-4">
@@ -212,14 +386,19 @@ export default function PasswordReset() {
                 </svg>
               </div>
               <h3 className="font-semibold text-lg" style={{ color: colors.text }}>
-                Code Verified!
+                PASSWORD RESET SUCCESSFUL
               </h3>
               <p className="text-sm" style={{ color: colors.textSecondary }}>
-                You can now set a new password for your account.
+                Your password has been reset successfully. You can now login with your new password.
               </p>
-              <Link href="/auth/set-new-password" className="block mt-4">
-                <Button fullWidth variant="primary">SET NEW PASSWORD</Button>
-              </Link>
+              <Button 
+                onClick={() => router.push("/auth/login")} 
+                fullWidth 
+                variant="primary"
+                className="mt-4"
+              >
+                GO TO LOGIN
+              </Button>
             </div>
 
             <div className="mt-6 text-center">
@@ -233,3 +412,4 @@ export default function PasswordReset() {
     </div>
   );
 }
+
