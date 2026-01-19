@@ -58,11 +58,13 @@ export default function Login() {
       saveToken(data.token);
       saveUser(data.user);
       
-      // Role-based navigation
+      // Role-based navigation with page refresh
       if (data.user?.role === 'admin') {
-        router.push('/dashboard');
+        window.location.href = '/dashboard';
+      } else if (data.user?.role === 'head_of_department') {
+        window.location.href = '/auth/select-department';
       } else {
-        router.push('/');
+        window.location.href = '/';
       }
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Login failed');
@@ -94,11 +96,13 @@ export default function Login() {
         saveToken(data.token);
         saveUser(data.user);
         
-        // Role-based navigation
+        // Role-based navigation with page refresh
         if (data.user?.role === 'admin') {
-          router.push('/dashboard');
+          window.location.href = '/dashboard';
+        } else if (data.user?.role === 'head_of_department') {
+          window.location.href = '/auth/select-department';
         } else {
-          router.push('/');
+          window.location.href = '/';
         }
       } catch (err) {
         setFormError(err instanceof Error ? err.message : 'Google login failed');

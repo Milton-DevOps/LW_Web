@@ -13,6 +13,8 @@ interface Book {
   category: string;
   downloads: number;
   status: 'published' | 'draft' | 'archived';
+  pdfUrl?: string;
+  devotionalDate?: string;
 }
 
 const ManageBooks: React.FC = () => {
@@ -30,7 +32,10 @@ const ManageBooks: React.FC = () => {
     category: 'Spirituality',
     downloadUrl: '',
     status: 'published' as 'published' | 'draft' | 'archived',
+    pdfFile: null as File | null,
+    devotionalDate: '',
   });
+  const [uploadingFile, setUploadingFile] = useState(false);
 
   useEffect(() => {
     fetchBooks();
@@ -56,24 +61,53 @@ const ManageBooks: React.FC = () => {
   );
 
   const handleAddOrEdit = async () => {
-    if (!formData.title || !formData.author || !formData.isbn || !formData.category || !formData.downloadUrl) {
-      alert('Please fill in all required fields');
+    if (!formData.title || !formData.author || !formData.isbn || !formData.category) {
+      alert('Please fill in all required fields (Title, Author, ISBN, Category)');
+      return;
+    }
+
+    if (!editingId && !formData.pdfFile) {
+      alert('Please upload a PDF file for new books');
+      return;
+    }
+
+    if (formData.category === 'Devotional' && !formData.devotionalDate) {
+      alert('Please select a date for devotional books');
       return;
     }
 
     setLoading(true);
     try {
+      const dataToSend: any = {
+        title: formData.title,
+        author: formData.author,
+        isbn: formData.isbn,
+        category: formData.category,
+        status: formData.status,
+        downloadUrl: formData.downloadUrl || 'N/A',
+      };
+
+      if (formData.category === 'Devotional' && formData.devotionalDate) {
+        dataToSend.devotionalDate = formData.devotionalDate;
+      }
+
+      // If PDF file is provided, we'll need to handle upload
+      if (formData.pdfFile) {
+        // For now, we'll just pass the file name and let backend handle validation
+        dataToSend.pdfFileName = formData.pdfFile.name;
+      }
+
       if (editingId) {
-        await bookService.updateBook(editingId, formData);
+        await bookService.updateBook(editingId, dataToSend);
         alert('Book updated successfully');
         setEditingId(null);
       } else {
-        await bookService.createBook(formData);
+        await bookService.createBook(dataToSend);
         alert('Book created successfully');
       }
 
       await fetchBooks();
-      setFormData({ title: '', author: '', isbn: '', category: 'Spirituality', downloadUrl: '', status: 'published' });
+      setFormData({ title: '', author: '', isbn: '', category: 'Spirituality', downloadUrl: '', status: 'published', pdfFile: null, devotionalDate: '' });
       setShowForm(false);
     } catch (error) {
       console.error('Error:', error);
@@ -91,6 +125,8 @@ const ManageBooks: React.FC = () => {
       category: book.category,
       downloadUrl: '',
       status: book.status,
+      pdfFile: null,
+      devotionalDate: book.devotionalDate ? book.devotionalDate.split('T')[0] : '',
     });
     setEditingId(book._id);
     setShowForm(true);
@@ -132,7 +168,7 @@ const ManageBooks: React.FC = () => {
           onClick={() => {
             setShowForm(true);
             setEditingId(null);
-            setFormData({ title: '', author: '', isbn: '', category: 'Spirituality', downloadUrl: '', status: 'published' });
+            setFormData({ title: '', author: '', isbn: '', category: 'Spirituality', downloadUrl: '', status: 'published', pdfFile: null, devotionalDate: '' });
           }}
           variant="primary"
           className="w-full sm:w-auto"
@@ -149,7 +185,7 @@ const ManageBooks: React.FC = () => {
             if (e.target === e.currentTarget) {
               setShowForm(false);
               setEditingId(null);
-              setFormData({ title: '', author: '', isbn: '', category: 'Spirituality', downloadUrl: '', status: 'published' });
+              setFormData({ title: '', author: '', isbn: '', category: 'Spirituality', downloadUrl: '', status: 'published', pdfFile: null, devotionalDate: '' });
             }
           }}
           style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', backdropFilter: 'blur(4px)' }}
@@ -205,19 +241,44 @@ const ManageBooks: React.FC = () => {
               <option value="draft">Draft</option>
               <option value="archived">Archived</option>
             </select>
+            {!editingId && (
+              <div className="col-span-1 md:col-span-2">
+                <label className="block text-sm font-medium mb-2">PDF Upload</label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  title="PDF Upload"
+                  onChange={(e) => setFormData({ ...formData, pdfFile: e.target.files?.[0] || null })}
+                  className="w-full px-4 py-2.5 text-base border-2 border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors bg-white text-gray-900"
+                  disabled={uploadingFile}
+                />
+                {formData.pdfFile && (
+                  <p className="text-sm text-green-600 mt-1">✓ {formData.pdfFile.name}</p>
+                )}
+              </div>
+            )}
+            {formData.category === 'Devotional' && (
+              <Input
+                type="date"
+                value={formData.devotionalDate}
+                onChange={(e) => setFormData({ ...formData, devotionalDate: e.target.value })}
+                placeholder="Devotional Date"
+              />
+            )}
           </div>
           <div className="flex gap-4 mt-6 pt-4 border-t" style={{ borderColor: colorScheme.border }}>
-            <Button onClick={handleAddOrEdit} variant="primary" className="flex-1">
-              {editingId ? 'Update' : 'Add'}
+            <Button onClick={handleAddOrEdit} variant="primary" className="flex-1" disabled={loading || uploadingFile}>
+              {loading ? 'Processing...' : (editingId ? 'Update' : 'Add')}
             </Button>
             <Button
               onClick={() => {
                 setShowForm(false);
                 setEditingId(null);
-                setFormData({ title: '', author: '', isbn: '', category: 'Spirituality', status: 'published' });
+                setFormData({ title: '', author: '', isbn: '', category: 'Spirituality', downloadUrl: '', status: 'published', pdfFile: null, devotionalDate: '' });
               }}
               variant="secondary"
               className="flex-1"
+              disabled={loading}
             >
               Cancel
             </Button>

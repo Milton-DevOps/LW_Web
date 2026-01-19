@@ -205,4 +205,29 @@ export const liveStreamService = {
       throw error;
     }
   },
+
+  // Save live stream as sermon (called when stream ends)
+  async saveStreamAsSermon(streamId: string) {
+    try {
+      const token = getToken();
+      
+      const response = await fetch(`${API_BASE_URL}/live-streams/${streamId}/save-as-sermon`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to save live stream as sermon');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error saving live stream as sermon:', error);
+      throw error;
+    }
+  },
 };

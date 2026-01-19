@@ -22,7 +22,7 @@ export const Navbar = () => {
     { label: 'Home', href: '/' },
     { label: 'Sermons', href: '/sermons' },
     { label: 'Books', href: '/books' },
-    { label: 'Projects', href: '/projects' },
+    { label: 'Programs & Services', href: '/programs' },
     { label: 'About', href: '/about' },
     { label: 'Contact Us', href: '/contact' },
   ];
@@ -76,8 +76,8 @@ export const Navbar = () => {
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           isScrolled
-            ? 'bg-black/25 backdrop-blur-xl shadow-2xl shadow-black/30 border-b border-white/10'
-            : 'bg-black/10 backdrop-blur-lg'
+            ? 'bg-black/35 backdrop-blur-xl shadow-2xl shadow-black/30 border-b border-white/10'
+            : 'bg-black/50 backdrop-blur-lg'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

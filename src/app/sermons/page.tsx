@@ -46,41 +46,79 @@ export default function Sermons() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedSermon, setSelectedSermon] = useState<Sermon | null>(null);
+  const [showLiveNotification, setShowLiveNotification] = useState(false);
   const itemsPerPage = 6;
 
-  // Fetch live stream
+  // Function to fetch sermons
+  const fetchSermons = async () => {
+    try {
+      const response = await sermonService.getSermons({ status: 'published' });
+      if (response.success && response.data) {
+        setSermons(response.data);
+        setFilteredSermons(response.data);
+      }
+    } catch (err) {
+      setError('Failed to load sermons');
+      console.error('Error fetching sermons:', err);
+    }
+  };
+
+  // Fetch live stream with polling and auto-save logic
   useEffect(() => {
     const fetchActiveLiveStream = async () => {
       try {
-        const response = await liveStreamService.getLiveStreams({ status: 'live' });
-        if (response.success && response.data && response.data.length > 0) {
-          setActiveLiveStream(response.data[0]);
+        // Fetch current live streams
+        const liveResponse = await liveStreamService.getLiveStreams({ status: 'live' });
+        console.log('Live stream response:', liveResponse);
+        
+        if (liveResponse.success && liveResponse.data && liveResponse.data.length > 0) {
+          const newLiveStream = liveResponse.data[0];
+          console.log('Live stream found:', newLiveStream);
+          
+          // Show notification if this is a new live stream
+          if (!activeLiveStream && newLiveStream) {
+            setShowLiveNotification(true);
+            console.log('Showing notification for new stream');
+            // Auto-hide notification after 5 seconds
+            setTimeout(() => setShowLiveNotification(false), 5000);
+          }
+          setActiveLiveStream(newLiveStream);
+        } else {
+          console.log('No live streams found');
+          // Check if there's an active live stream that has ended
+          if (activeLiveStream) {
+            try {
+              // Try to save the ended stream as a sermon
+              console.log(`Live stream ${activeLiveStream._id} has ended. Attempting to save as sermon...`);
+              await liveStreamService.saveStreamAsSermon(activeLiveStream._id);
+              console.log(`Successfully saved live stream as sermon`);
+              // Refresh sermons list to show the newly saved sermon
+              fetchSermons();
+            } catch (err) {
+              console.error('Error saving stream as sermon:', err);
+            }
+          }
+          setActiveLiveStream(null);
         }
       } catch (err) {
         console.error('Error fetching live stream:', err);
       }
     };
-    fetchActiveLiveStream();
-  }, []);
 
-  // Fetch sermons
+    // Fetch immediately
+    fetchActiveLiveStream();
+
+    // Poll every 10 seconds to check for new live streams
+    const interval = setInterval(fetchActiveLiveStream, 10000);
+
+    return () => clearInterval(interval);
+  }, [activeLiveStream]);
+
+  // Fetch sermons on component mount
   useEffect(() => {
-    const fetchSermons = async () => {
-      setLoading(true);
-      try {
-        const response = await sermonService.getSermons({ status: 'published' });
-        if (response.success && response.data) {
-          setSermons(response.data);
-          setFilteredSermons(response.data);
-        }
-      } catch (err) {
-        setError('Failed to load sermons');
-        console.error('Error fetching sermons:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSermons();
+    setLoading(true);
+    fetchSermons().finally(() => setLoading(false));
   }, []);
 
   // Handle search and filter
@@ -149,7 +187,7 @@ export default function Sermons() {
 
           {/* Live Stream Section */}
           {activeLiveStream && (
-            <div className="mb-16">
+            <div className="mb-16" data-live-stream>
               <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-black/50 border border-white/10 backdrop-blur-xl">
                 {/* Live Badge */}
                 <div className="absolute top-4 left-4 z-10">
@@ -172,10 +210,11 @@ export default function Sermons() {
                     <div className="relative w-full bg-black rounded-xl overflow-hidden" style={{ paddingBottom: '56.25%' }}>
                       <iframe
                         className="absolute top-0 left-0 w-full h-full"
-                        src={`${activeLiveStream.streamUrl}?autoplay=1`}
+                        src={`${activeLiveStream.streamUrl}${activeLiveStream.streamUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1`}
                         title={activeLiveStream.title}
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
+                        loading="lazy"
                       />
                     </div>
                   </div>
@@ -369,7 +408,12 @@ export default function Sermons() {
                       )}
 
                       {/* Play Button */}
-                      <Button variant="primary" fullWidth size="sm">
+                      <Button 
+                        variant="primary" 
+                        fullWidth 
+                        size="sm"
+                        onClick={() => setSelectedSermon(sermon)}
+                      >
                         Play Sermon
                       </Button>
                     </div>
@@ -421,6 +465,90 @@ export default function Sermons() {
           )}
         </div>
       </main>
+
+      {/* Video Player Modal */}
+      {selectedSermon && (
+        <div 
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedSermon(null)}
+        >
+          <div 
+            className="bg-black rounded-lg overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <div className="flex justify-end p-4">
+              <button
+                onClick={() => setSelectedSermon(null)}
+                className="text-white hover:text-gray-300 transition-colors"
+                title="Close"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Video Player */}
+            <div className="bg-black relative w-full" style={{ paddingBottom: '56.25%' }}>
+              {selectedSermon.videoUrl ? (
+                <iframe
+                  className="absolute top-0 left-0 w-full h-full"
+                  src={selectedSermon.videoUrl}
+                  title={selectedSermon.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black text-white">
+                  <p className="text-lg">Video URL not available</p>
+                </div>
+              )}
+            </div>
+
+            {/* Sermon Info */}
+            <div className="bg-white p-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">{selectedSermon.title}</h2>
+              <div className="space-y-2 text-gray-600">
+                <p><span className="font-semibold">Speaker:</span> {selectedSermon.mainSpeaker}</p>
+                <p><span className="font-semibold">Date:</span> {formatDate(selectedSermon.datePreached)}</p>
+                {selectedSermon.series && <p><span className="font-semibold">Series:</span> {selectedSermon.series}</p>}
+                {selectedSermon.description && <p className="mt-4">{selectedSermon.description}</p>}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Live Stream Notification */}
+      {showLiveNotification && activeLiveStream && (
+        <div className="fixed bottom-8 right-8 bg-red-600 text-white rounded-lg shadow-2xl p-4 z-40 animate-pulse max-w-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+            <div>
+              <p className="font-bold text-lg">🔴 LIVE NOW!</p>
+              <p className="text-sm">{activeLiveStream.title}</p>
+              <p className="text-xs mt-1 opacity-90">Hosted by {activeLiveStream.host}</p>
+            </div>
+            <button
+              onClick={() => setShowLiveNotification(false)}
+              className="ml-2 text-white hover:text-gray-200"
+            >
+              ✕
+            </button>
+          </div>
+          <button
+            onClick={() => {
+              setShowLiveNotification(false);
+              // Scroll to live stream section
+              document.querySelector('[data-live-stream]')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="w-full mt-3 bg-white text-red-600 font-bold py-2 rounded hover:bg-gray-100 transition-colors"
+          >
+            Watch Live
+          </button>
+        </div>
+      )}
 
       <Footer />
     </div>
