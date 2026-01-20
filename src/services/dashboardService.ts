@@ -1,6 +1,7 @@
 // LW_Web/src/services/dashboardService.ts
 
 import { getToken } from './authService';
+import { fetchAPI } from '@/utils/fetchHelper';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -63,7 +64,7 @@ export const dashboardService = {
   // Get sermon statistics
   async getSermonStats(): Promise<{ stats: SermonStats }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/sermons/stats`, {
+      const response = await fetchAPI(`/sermons/stats`, {
         method: 'GET',
         headers: getAuthHeaders(),
       });
@@ -107,7 +108,7 @@ export const dashboardService = {
   // Get live stream statistics
   async getLiveStreamStats(): Promise<{ stats: LiveStreamStats }> {
     try {
-      const response = await fetch(`${API_BASE_URL}/live-streams/stats`, {
+      const response = await fetchAPI(`/live-streams/stats`, {
         method: 'GET',
         headers: getAuthHeaders(),
       });

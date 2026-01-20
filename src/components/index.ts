@@ -12,3 +12,9 @@ export { default as ManageSermons } from './adminComponents/ManageSermons';
 export { default as ManageUsers } from './adminComponents/ManageUsers';
 export { default as ManageBooks } from './adminComponents/ManageBooks';
 export { default as LiveStream } from './adminComponents/LiveStream';
+
+// Daily Light Department Components
+export { default as DailyLightDashboard } from './dailyLightComponents/DailyLightDashboard';
+
+// Media Department Components
+export { default as MediaDepartmentDashboard } from './mediaComponents/MediaDepartmentDashboard';

@@ -1,4 +1,5 @@
 import { getToken } from './authService';
+import { fetchAPI } from '@/utils/fetchHelper';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -17,7 +18,7 @@ export const sermonService = {
       const queryString = new URLSearchParams(
         Object.entries(params).map(([key, value]) => [key, String(value)])
       ).toString();
-      const response = await fetch(`${API_BASE_URL}/sermons?${queryString}`);
+      const response = await fetchAPI(`/sermons?${queryString}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch sermons');
@@ -33,7 +34,7 @@ export const sermonService = {
   // Get sermon by ID
   async getSermonById(id: string) {
     try {
-      const response = await fetch(`${API_BASE_URL}/sermons/${id}`);
+      const response = await fetchAPI(`/sermons/${id}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch sermon');
@@ -58,10 +59,9 @@ export const sermonService = {
         throw new Error('Authentication required. Please log in again.');
       }
       
-      const response = await fetch(`${API_BASE_URL}/sermons`, {
+      const response = await fetchAPI(`/sermons`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(sermonData),

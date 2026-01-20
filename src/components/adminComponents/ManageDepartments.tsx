@@ -159,14 +159,6 @@ const ManageDepartments: React.FC = () => {
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
-            <Input
-              type="text"
-              placeholder="Head of Department"
-              value={formData.headOfDepartment}
-              onChange={(e) =>
-                setFormData({ ...formData, headOfDepartment: e.target.value })
-              }
-            />
             <textarea
               className="md:col-span-2 w-full px-4 py-2.5 text-base border-2 border-gray-300 rounded focus:outline-none focus:border-[#cb4154] transition-colors bg-white text-gray-900 resize-none"
               placeholder="Department Description"
@@ -199,7 +191,7 @@ const ManageDepartments: React.FC = () => {
               onClick={() => {
                 setShowForm(false);
                 setEditingId(null);
-                setFormData({ name: '', description: '', headOfDepartment: '', isActive: true });
+                setFormData({ name: '', description: '', isActive: true });
               }}
               className="flex-1"
               style={{ backgroundColor: '#999999' }}
@@ -259,7 +251,6 @@ const ManageDepartments: React.FC = () => {
                     </p>
                   </div>
                 </td>
-                <td className="px-4 py-3">{dept.headOfDepartment}</td>
                 <td className="px-4 py-3 font-medium">{dept.memberCount}</td>
                 <td className="px-4 py-3">
                   <span

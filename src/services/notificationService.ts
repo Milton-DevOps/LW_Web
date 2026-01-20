@@ -282,4 +282,41 @@ export const notificationService = {
       throw error;
     }
   },
+
+  // Send announcement to department members
+  async sendDepartmentAnnouncement(
+    departmentId: string,
+    data: { title: string; content: string }
+  ) {
+    try {
+      const token = getToken();
+
+      const response = await fetch(
+        `${API_BASE_URL}/notifications/department/${departmentId}/announcement`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to send announcement');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error sending announcement:', error);
+      throw error;
+    }
+  },
+
+  // Get user notifications (alias for getNotifications)
+  async getUserNotifications(params: NotificationParams = {}) {
+    return this.getNotifications(params);
+  },
 };

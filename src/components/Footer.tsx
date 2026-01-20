@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { Button, Input } from '@/components';
 import styles from './Footer.module.css';
 
 export const Footer: React.FC = () => {
@@ -89,15 +90,15 @@ export const Footer: React.FC = () => {
             </div>
 
             <form className={styles.newsletterForm} onSubmit={(e) => e.preventDefault()}>
-              <input
+              <Input
                 aria-label="Email address"
-                className={styles.newsletterInput}
                 placeholder="Enter your email"
                 type="email"
+                className={styles.newsletterInput}
               />
-              <button type="submit" className={styles.submitButton}>
+              <Button type="submit" variant="primary" size="sm">
                 Subscribe Now
-              </button>
+              </Button>
             </form>
 
             <p className={styles.footerCredit}>Light World Mission © {year}</p>

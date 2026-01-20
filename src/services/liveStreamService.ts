@@ -1,4 +1,5 @@
 import { getToken } from './authService';
+import { fetchAPI } from '@/utils/fetchHelper';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -7,7 +8,7 @@ export const liveStreamService = {
   async getLiveStreams(params = {}) {
     try {
       const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(`${API_BASE_URL}/live-streams?${queryString}`);
+      const response = await fetchAPI(`/live-streams?${queryString}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch live streams');
@@ -23,7 +24,7 @@ export const liveStreamService = {
   // Get live stream by ID
   async getLiveStreamById(id: string) {
     try {
-      const response = await fetch(`${API_BASE_URL}/live-streams/${id}`);
+      const response = await fetchAPI(`/live-streams/${id}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch live stream');

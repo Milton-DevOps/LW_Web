@@ -230,7 +230,6 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
       <NotificationModal
         isOpen={isNotificationModalOpen}
         onClose={() => setIsNotificationModalOpen(false)}
-        colorMode={colorScheme}
       />
       <EditProfileModal
         isOpen={isProfileModalOpen}
@@ -241,4 +240,3 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
 };
 
 export default Header;
-

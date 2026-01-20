@@ -179,4 +179,139 @@ export const departmentService = {
       throw error;
     }
   },
+
+  // Request to join a department
+  async requestToJoinDepartment(departmentId: string, requestMessage?: string) {
+    try {
+      const token = getToken();
+      
+      const response = await fetch(`${API_BASE_URL}/departments/${departmentId}/join-request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ requestMessage }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to submit join request');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error requesting to join department:', error);
+      throw error;
+    }
+  },
+
+  // Get pending join requests for a department
+  async getDepartmentJoinRequests(departmentId: string, status?: string) {
+    try {
+      const token = getToken();
+      const queryString = status ? `?status=${status}` : '';
+      
+      const response = await fetch(
+        `${API_BASE_URL}/departments/${departmentId}/join-requests${queryString}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch join requests');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching join requests:', error);
+      throw error;
+    }
+  },
+
+  // Approve or reject a join request
+  async respondToJoinRequest(
+    departmentId: string,
+    requestId: string,
+    data: { status: 'approved' | 'rejected'; rejectionReason?: string }
+  ) {
+    try {
+      const token = getToken();
+      
+      const response = await fetch(
+        `${API_BASE_URL}/departments/${departmentId}/join-requests/${requestId}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify(data),
+        }
+      );
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to respond to join request');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error responding to join request:', error);
+      throw error;
+    }
+  },
+
+  // Get all members of a department
+  async getDepartmentMembers(departmentId: string) {
+    try {
+      const token = getToken();
+      
+      const response = await fetch(`${API_BASE_URL}/departments/${departmentId}/members`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch members');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching members:', error);
+      throw error;
+    }
+  },
+
+  // Remove a member from department
+  async removeMemberFromDepartment(departmentId: string, memberId: string) {
+    try {
+      const token = getToken();
+      
+      const response = await fetch(`${API_BASE_URL}/departments/${departmentId}/members`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId: memberId }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to remove member');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error removing member:', error);
+      throw error;
+    }
+  },
 };

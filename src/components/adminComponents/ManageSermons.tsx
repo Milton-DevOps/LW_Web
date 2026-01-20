@@ -126,15 +126,15 @@ const ManageSermons: React.FC = () => {
         setVideoUploadProgress(progress);
       });
 
-      if (response.success) {
+      if ((response as any).success) {
         setFormData(prev => ({
           ...prev,
-          videoUrl: response.videoUrl
+          videoUrl: (response as any).videoUrl
         }));
         alert('Video uploaded successfully!');
         setVideoUploadProgress(0);
       } else {
-        alert(response.message || 'Failed to upload video');
+        alert(((response as any).message) || 'Failed to upload video');
       }
     } catch (error) {
       console.error('Upload error:', error);
@@ -162,7 +162,7 @@ const ManageSermons: React.FC = () => {
         <Button
           onClick={openAddModal}
           variant="primary"
-          className="w-full sm:w-auto px-6 py-2 rounded-lg font-semibold"
+          className="w-full sm:w-auto px-6 py-2 font-semibold"
         >
           + Add Sermon
         </Button>
