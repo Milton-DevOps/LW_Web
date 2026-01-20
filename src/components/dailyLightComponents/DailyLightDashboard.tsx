@@ -20,6 +20,33 @@ const DailyLightDashboard: React.FC = () => {
   const router = useRouter();
   const user = getUser();
 
+  // Check authorization
+  useEffect(() => {
+    const token = getToken();
+    const currentUser = getUser();
+
+    // Check if user is authenticated
+    if (!token) {
+      router.push('/auth/login');
+      return;
+    }
+
+    // Check if user is admin or head_of_department
+    if (currentUser?.role !== 'head_of_department' && currentUser?.role !== 'admin') {
+      router.push('/');
+      return;
+    }
+
+    // If head_of_department, check if they belong to Daily Light department
+    if (currentUser?.role === 'head_of_department') {
+      const dailyLightDepts = ['Daily Light', 'daily_light', 'Daily-Light'];
+      if (!dailyLightDepts.includes(currentUser?.department || '')) {
+        router.push('/');
+        return;
+      }
+    }
+  }, [router]);
+
   const handleSectionChange = (section: string) => {
     setActiveSection(section as DashboardSection);
     // Close sidebar on mobile when navigating

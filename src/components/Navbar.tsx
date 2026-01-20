@@ -236,6 +236,96 @@ export const Navbar = () => {
                         </div>
                         
                         <div className="py-2">
+                          {/* Dashboard Navigation - Only show for admin and head_of_department */}
+                          {(user?.role === 'admin' || user?.role === 'head_of_department') && (
+                            <>
+                              {user?.role === 'admin' && (
+                                <Link href="/dashboard">
+                                  <button
+                                    type="button"
+                                    onClick={() => setIsProfileOpen(false)}
+                                    className="w-full text-left px-5 py-3 text-sm text-white hover:bg-[#cb4154]/20 hover:text-[#cb4154] transition-all duration-300 flex items-center group"
+                                    title="Go to Admin Dashboard"
+                                  >
+                                    <span className="mr-3 text-lg">📊</span>
+                                    <span>Admin Dashboard</span>
+                                    <span className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</span>
+                                  </button>
+                                </Link>
+                              )}
+                              
+                              {/* Department Navigation - Only show appropriate departments */}
+                              {user?.role === 'head_of_department' && (
+                                <>
+                                  {/* Audio/Visual Department */}
+                                  {(user?.department === 'Audio Visual' || user?.department === 'audio_visual' || user?.department === 'Audio-Visual') && (
+                                    <Link href="/mediaDepartment">
+                                      <button
+                                        type="button"
+                                        onClick={() => setIsProfileOpen(false)}
+                                        className="w-full text-left px-5 py-3 text-sm text-white hover:bg-[#cb4154]/20 hover:text-[#cb4154] transition-all duration-300 flex items-center group"
+                                        title="Go to Media Department"
+                                      >
+                                        <span className="mr-3 text-lg">🎬</span>
+                                        <span>Media Department</span>
+                                        <span className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</span>
+                                      </button>
+                                    </Link>
+                                  )}
+                                  
+                                  {/* Daily Light Department */}
+                                  {(user?.department === 'Daily Light' || user?.department === 'daily_light' || user?.department === 'Daily-Light') && (
+                                    <Link href="/dailyLightDepartment">
+                                      <button
+                                        type="button"
+                                        onClick={() => setIsProfileOpen(false)}
+                                        className="w-full text-left px-5 py-3 text-sm text-white hover:bg-[#cb4154]/20 hover:text-[#cb4154] transition-all duration-300 flex items-center group"
+                                        title="Go to Daily Light Department"
+                                      >
+                                        <span className="mr-3 text-lg">📚</span>
+                                        <span>Daily Light Department</span>
+                                        <span className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</span>
+                                      </button>
+                                    </Link>
+                                  )}
+                                </>
+                              )}
+
+                              {/* For Admin, show all departments */}
+                              {user?.role === 'admin' && (
+                                <>
+                                  <Link href="/mediaDepartment">
+                                    <button
+                                      type="button"
+                                      onClick={() => setIsProfileOpen(false)}
+                                      className="w-full text-left px-5 py-3 text-sm text-white hover:bg-[#cb4154]/20 hover:text-[#cb4154] transition-all duration-300 flex items-center group"
+                                      title="Go to Media Department"
+                                    >
+                                      <span className="mr-3 text-lg">🎬</span>
+                                      <span>Media Department</span>
+                                      <span className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</span>
+                                    </button>
+                                  </Link>
+                                  <Link href="/dailyLightDepartment">
+                                    <button
+                                      type="button"
+                                      onClick={() => setIsProfileOpen(false)}
+                                      className="w-full text-left px-5 py-3 text-sm text-white hover:bg-[#cb4154]/20 hover:text-[#cb4154] transition-all duration-300 flex items-center group"
+                                      title="Go to Daily Light Department"
+                                    >
+                                      <span className="mr-3 text-lg">📚</span>
+                                      <span>Daily Light Department</span>
+                                      <span className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300">→</span>
+                                    </button>
+                                  </Link>
+                                </>
+                              )}
+                              <div className="px-5 py-1">
+                                <div className="h-px bg-white/10"></div>
+                              </div>
+                            </>
+                          )}
+
                           <Link href="/auth/edit-profile">
                             <button
                               type="button"

@@ -30,6 +30,26 @@ const MediaDepartmentDashboard: React.FC = () => {
   const router = useRouter();
   const { user } = useAuthContext();
 
+  // Check authorization
+  useEffect(() => {
+    if (!user) return;
+
+    // If admin, allow full access
+    if (user.role === 'admin') return;
+
+    // If head_of_department, check if they belong to Audio Visual/Media department
+    if (user.role === 'head_of_department') {
+      const mediaDepts = ['Audio Visual', 'audio_visual', 'Audio-Visual', 'media', 'Media', 'Media Department'];
+      if (!mediaDepts.includes(user.department || '')) {
+        router.push('/');
+        return;
+      }
+    } else {
+      // Not authorized
+      router.push('/');
+    }
+  }, [user, router]);
+
   const handleSectionChange = (section: string) => {
     setActiveSection(section as DashboardSection);
     // Close sidebar on mobile when navigating

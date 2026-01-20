@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Navbar } from '../../components/Navbar';
+import { Carousel } from '../../components/Carousel';
 import { Footer } from '../../components/Footer';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
@@ -39,6 +40,7 @@ interface Sermon {
 
 export default function Sermons() {
   const [activeLiveStream, setActiveLiveStream] = useState<LiveStream | null>(null);
+  const [scheduledLiveStreams, setScheduledLiveStreams] = useState<LiveStream[]>([]);
   const [sermons, setSermons] = useState<Sermon[]>([]);
   const [filteredSermons, setFilteredSermons] = useState<Sermon[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,6 +51,28 @@ export default function Sermons() {
   const [selectedSermon, setSelectedSermon] = useState<Sermon | null>(null);
   const [showLiveNotification, setShowLiveNotification] = useState(false);
   const itemsPerPage = 6;
+
+  // Carousel items
+  const carouselItems = [
+    {
+      id: 1,
+      image: '/App images/10x better.jpg',
+      title: 'Experience Inspiring Sermons',
+      description: 'Listen to powerful spiritual messages',
+    },
+    {
+      id: 2,
+      image: '/App images/PLCrusade.jpg',
+      title: 'Grow Your Faith',
+      description: 'Join our community of believers',
+    },
+    {
+      id: 3,
+      image: '/App images/PLCrusade2.jpg',
+      title: 'Transform Your Life',
+      description: 'Discover spiritual wisdom and guidance',
+    },
+  ];
 
   // Function to fetch sermons
   const fetchSermons = async () => {
@@ -115,6 +139,46 @@ export default function Sermons() {
     return () => clearInterval(interval);
   }, [activeLiveStream]);
 
+  // Fetch scheduled live streams
+  useEffect(() => {
+    const fetchScheduledLiveStreams = async () => {
+      try {
+        const scheduledResponse = await liveStreamService.getLiveStreams({ status: 'scheduled' });
+        console.log('Scheduled streams response:', scheduledResponse);
+        
+        if (scheduledResponse.success && scheduledResponse.data && scheduledResponse.data.length > 0) {
+          const now = new Date();
+          const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+          
+          // Filter out scheduled streams older than 24 hours
+          const validStreams = scheduledResponse.data.filter((stream: LiveStream) => {
+            const streamStartTime = new Date(stream.startTime);
+            return streamStartTime >= twentyFourHoursAgo;
+          });
+          
+          // Sort by startTime (earliest first)
+          const sorted = validStreams.sort((a: LiveStream, b: LiveStream) => {
+            return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+          });
+          
+          console.log(`Filtered scheduled streams: ${sorted.length} valid streams (removed ${scheduledResponse.data.length - sorted.length} older than 24 hours)`);
+          setScheduledLiveStreams(sorted);
+        } else {
+          setScheduledLiveStreams([]);
+        }
+      } catch (err) {
+        console.error('Error fetching scheduled live streams:', err);
+      }
+    };
+
+    fetchScheduledLiveStreams();
+
+    // Poll every 30 seconds to check for new scheduled streams and remove old ones
+    const interval = setInterval(fetchScheduledLiveStreams, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Fetch sermons on component mount
   useEffect(() => {
     setLoading(true);
@@ -164,6 +228,16 @@ export default function Sermons() {
     });
   };
 
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -173,6 +247,17 @@ export default function Sermons() {
   return (
     <div className={`${styles.bgSurface} min-h-screen flex flex-col`}>
       <Navbar />
+
+      {/* Reduced Height Carousel - 40vh instead of 80vh */}
+      <div className="relative w-full h-[60vh] overflow-hidden">
+        <Carousel 
+          items={carouselItems} 
+          autoPlay={true}
+          autoPlayInterval={5000}
+          showControls={true}
+          showIndicators={true}
+        />
+      </div>
 
       {/* Live Stream Section - Full Width at Top */}
       {activeLiveStream && (
@@ -227,6 +312,89 @@ export default function Sermons() {
               Listen to inspiring sermons from our spiritual leaders and expand your spiritual journey.
             </p>
           </div>
+
+          {/* Scheduled Live Streams Section */}
+          {scheduledLiveStreams.length > 0 && (
+            <div className="mb-16 pb-16 border-b-2 border-gray-200">
+              <h2 className="text-2xl md:text-3xl font-bold mb-6">Upcoming Live Streams</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {scheduledLiveStreams.map((stream) => (
+                  <div
+                    key={stream._id}
+                    className="rounded-xl overflow-hidden bg-white shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100"
+                  >
+                    {/* Thumbnail Placeholder */}
+                    <div className="relative bg-gradient-to-br from-blue-500 to-purple-600 h-40 flex items-center justify-center overflow-hidden">
+                      <div className="absolute inset-0 opacity-20">
+                        <div className="w-full h-full bg-black/30"></div>
+                      </div>
+                      <div className="relative text-center z-10">
+                        <svg className="w-12 h-12 text-white mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        <span className="text-white font-semibold text-sm">SCHEDULED</span>
+                      </div>
+
+                      {/* Scheduled Badge */}
+                      <div className="absolute top-3 right-3 z-20">
+                        <div className="flex items-center space-x-2 bg-blue-600 px-3 py-1 rounded-full text-xs font-semibold text-white">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.5H7a1 1 0 100 2h4a1 1 0 001-1V7z" clipRule="evenodd" />
+                          </svg>
+                          <span>Coming Soon</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-5">
+                      <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2">
+                        {stream.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-3">
+                        by <span className="font-semibold">{stream.host}</span>
+                      </p>
+
+                      {/* Start Time */}
+                      <div className="flex items-center gap-2 mb-3 text-sm text-gray-700">
+                        <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.5H7a1 1 0 100 2h4a1 1 0 001-1V7z" clipRule="evenodd" />
+                        </svg>
+                        <span>{formatDateTime(stream.startTime)}</span>
+                      </div>
+
+                      {/* Category */}
+                      {stream.category && (
+                        <div className="mb-3">
+                          <span className="inline-block text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                            {stream.category}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Description */}
+                      {stream.description && (
+                        <p className="text-xs text-gray-600 mb-4 line-clamp-2">{stream.description}</p>
+                      )}
+
+                      {/* Reminder Button */}
+                      <Button 
+                        variant="primary" 
+                        fullWidth 
+                        size="sm"
+                        className="flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+                        Set Reminder
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Search and Filter Section */}
           <div className="mb-12 space-y-6">

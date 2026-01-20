@@ -5,6 +5,7 @@ import { Button, Input } from '@/components';
 import { colors } from '@/constants/colors';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
@@ -93,7 +94,23 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
           </div>
         </div>
 
-        {/* Right Section - Profile Dropdown */}
+        {/* Right Section - Action Buttons */}
+        <div className="flex items-center gap-2 md:gap-4">
+          {/* Go to Home Button */}
+          <Link href="/">
+            <button
+              className="px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-semibold text-white bg-[#e09510] hover:bg-[#d88409] transition-colors duration-300 flex items-center gap-2"
+              title="Go to Home"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 4l4 2m-8-4l4-2" />
+              </svg>
+              <span className="hidden sm:inline">Home</span>
+            </button>
+          </Link>
+        </div>
+
+        {/* Profile Dropdown - Moved to the right section */}
         <div className="flex items-center gap-3 md:gap-4 flex-shrink-0" ref={dropdownRef}>
           {/* User Profile Dropdown */}
           <div className="relative">

@@ -84,22 +84,22 @@ export default function PasswordReset() {
     setFormError("");
     setLoading(true);
 
-    const otpValue = otp.join("");
-    if (otpValue.length !== 6) {
-      setFormError("Please enter a valid 6-digit code");
-      setLoading(false);
-      return;
-    }
-
     try {
+      const otpValue = otp.join("");
+      if (otpValue.length !== 6) {
+        setFormError("Please enter a valid 6-digit code");
+        setLoading(false);
+        return;
+      }
+
       const response = await verifyOTP(email, otpValue);
       if (response.success) {
         setStage("newPassword");
       } else {
-        setFormError(response.message || "Failed to verify code");
+        setFormError(response.message || "Invalid OTP");
       }
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Failed to verify code");
+      setFormError(error instanceof Error ? error.message : "Failed to verify OTP");
     } finally {
       setLoading(false);
     }
@@ -110,20 +110,14 @@ export default function PasswordReset() {
     setFormError("");
     setLoading(true);
 
-    if (!newPassword || !confirmPassword) {
-      setFormError("Please fill in all fields");
-      setLoading(false);
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      setFormError("Password must be at least 6 characters");
-      setLoading(false);
-      return;
-    }
-
     if (newPassword !== confirmPassword) {
       setFormError("Passwords do not match");
+      setLoading(false);
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setFormError("Password must be at least 8 characters");
       setLoading(false);
       return;
     }
@@ -132,8 +126,10 @@ export default function PasswordReset() {
       const response = await resetPassword(email, newPassword, confirmPassword);
       if (response.success) {
         setStage("success");
-      } else {
-        setFormError(response.message || "Failed to reset password");
+        // Redirect after 2 seconds with page refresh
+        setTimeout(() => {
+          window.location.href = '/auth/login';
+        }, 2000);
       }
     } catch (error) {
       setFormError(error instanceof Error ? error.message : "Failed to reset password");
