@@ -4,6 +4,8 @@ export { Hero } from './Hero';
 export { Carousel } from './Carousel';
 export { Navbar } from './Navbar';
 export { ProjectCard } from './ProjectCard';
+export { ProjectModal } from './ProjectModal';
+export { AllProjectsModal } from './AllProjectsModal';
 
 // Admin Components
 export { default as AdminDashboard } from './adminComponents/AdminDashboard';

@@ -57,7 +57,7 @@ export const Carousel: React.FC<CarouselProps> = ({
   }, [currentIndex, autoPlay, autoPlayInterval]);
 
   if (items.length === 0) {
-    return <div className="w-full h-96 bg-gray-200 flex items-center justify-center">No items to display</div>;
+    return <div className="w-full h-96 bg-gray-300 flex items-center justify-center text-gray-600 font-medium">No items to display</div>;
   }
 
   const currentItem = items[currentIndex];
@@ -65,7 +65,7 @@ export const Carousel: React.FC<CarouselProps> = ({
   return (
     <div className="relative w-full overflow-hidden">
       {/* Main Carousel Container */}
-      <div className="relative w-full h-[80vh] bg-gray-200">
+      <div className="relative w-full h-[60vh] sm:h-[70vh] md:h-[80vh] bg-gray-300">
         {/* Slides */}
         {items.map((item, index) => (
           <div
@@ -81,15 +81,15 @@ export const Carousel: React.FC<CarouselProps> = ({
               alt={item.title}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-black/30" />
+            <div className="absolute inset-0 bg-black/35" />
             
             {/* Content Overlay */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-4">
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-6 leading-tight drop-shadow-lg">
                 {item.title}
               </h2>
               {item.description && (
-                <p className="text-sm sm:text-base md:text-lg text-gray-200 max-w-2xl">
+                <p className="text-sm sm:text-lg md:text-xl text-gray-100 max-w-3xl leading-relaxed drop-shadow-md">
                   {item.description}
                 </p>
               )}
@@ -98,64 +98,75 @@ export const Carousel: React.FC<CarouselProps> = ({
         ))}
       </div>
 
-      {/* Controls */}
-      {showControls && (
+      {/* Controls - Responsive */}
+      {showControls && items.length > 1 && (
         <>
           <button
             onClick={prevSlide}
             className="
+              hidden sm:flex
               absolute
-              left-4 sm:left-6
+              left-4 sm:left-6 lg:left-8
               top-1/2
               -translate-y-1/2
               z-30
               p-2 sm:p-3
               bg-white/20
               hover:bg-white/40
+              backdrop-blur-sm
               text-white
-              text-xl sm:text-2xl
-              transition-colors
+              transition-all
               duration-200
+              items-center
+              justify-center
             "
             aria-label="Previous slide"
           >
-            &#10094;
+            <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
           </button>
 
           <button
             onClick={nextSlide}
             className="
+              hidden sm:flex
               absolute
-              right-4 sm:right-6
+              right-4 sm:right-6 lg:right-8
               top-1/2
               -translate-y-1/2
               z-30
               p-2 sm:p-3
               bg-white/20
               hover:bg-white/40
+              backdrop-blur-sm
               text-white
-              text-xl sm:text-2xl
-              transition-colors
+              transition-all
               duration-200
+              items-center
+              justify-center
             "
             aria-label="Next slide"
           >
-            &#10095;
+            <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </button>
         </>
       )}
 
       {/* Indicators */}
-      {showIndicators && (
+      {showIndicators && items.length > 1 && (
         <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2 sm:gap-3">
           {items.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
               className={`
-                w-2 sm:w-3 h-2 sm:h-3
-                transition-all duration-300
-                ${index === currentIndex ? 'bg-[#cb4154] w-8 sm:w-10' : 'bg-white/50 hover:bg-white/80'}
+                transition-all duration-300 rounded-full
+                ${index === currentIndex 
+                  ? 'bg-[#cb4154] w-8 sm:w-10 h-2 sm:h-3' 
+                  : 'bg-white/50 hover:bg-white/80 w-2 sm:w-3 h-2 sm:h-3'}
               `}
               aria-label={`Go to slide ${index + 1}`}
             />

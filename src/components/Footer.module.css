@@ -1,8 +1,8 @@
 .footer {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border-top: 2px solid #e5e7eb;
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
   color: #1f2937;
-  padding: 3rem 0 1rem;
+  padding: 3rem 1rem 1rem;
 }
 
 .container {
@@ -13,9 +13,9 @@
 
 .gridContainer {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2.5rem;
+  margin-bottom: 2.5rem;
 }
 
 .section {
@@ -25,17 +25,25 @@
 }
 
 .sectionTitle {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: #1f2937;
   margin-bottom: 0.5rem;
+  letter-spacing: -0.025em;
 }
 
 .sectionSubtitle {
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   color: #4b5563;
   margin-bottom: 0.75rem;
+}
+
+.interestLabel {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
 }
 
 /* Newsletter Section */
@@ -43,21 +51,6 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-
-.newsletterInput {
-  padding: 0.75rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  transition: all 0.3s ease;
-  font-family: inherit;
-}
-
-.newsletterInput:focus {
-  outline: none;
-  border-color: #cb4154;
-  box-shadow: 0 0 0 3px rgba(203, 65, 84, 0.1);
 }
 
 .newsletterCheckboxes {
@@ -69,10 +62,11 @@
 .checkboxLabel {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
+  gap: 0.625rem;
+  font-size: 0.9375rem;
   cursor: pointer;
   color: #4b5563;
+  font-weight: 500;
 }
 
 .checkboxLabel input {
@@ -80,34 +74,21 @@
   height: 1.125rem;
   cursor: pointer;
   accent-color: #cb4154;
+  flex-shrink: 0;
 }
 
-.submitButton {
-  padding: 0.75rem 1.5rem;
-  background-color: #cb4154;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.submitButton:hover {
-  background-color: #a8354a;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(203, 65, 84, 0.3);
-}
-
-.submitButton:active {
-  transform: translateY(0);
+.checkboxLabel span {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .footerCredit {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   color: #9ca3af;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
+  font-weight: 500;
 }
 
 /* App Store Section */
@@ -116,9 +97,9 @@
   flex-direction: column;
   align-items: center;
   gap: 1.5rem;
-  padding: 1.5rem;
-  background-color: #f3f4f6;
-  border-radius: 0.75rem;
+  padding: 2rem;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
   text-align: center;
 }
 
@@ -132,14 +113,15 @@
 .appBadge {
   transition: all 0.3s ease;
   cursor: pointer;
-  height: 3rem;
+  height: auto;
   display: flex;
   align-items: center;
+  padding: 0.5rem;
 }
 
 .appBadge:hover {
-  transform: scale(1.05);
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+  transform: translateY(-2px);
+  filter: drop-shadow(0 4px 12px rgba(203, 65, 84, 0.2));
 }
 
 .appBadgeSvg {
@@ -151,42 +133,47 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  max-width: 100%;
 }
 
 .benefitsHighlight {
   font-weight: 700;
   color: #cb4154;
-  font-size: 1rem;
+  font-size: 1.0625rem;
+  letter-spacing: -0.015em;
 }
 
 .benefitsSubtext {
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   color: #4b5563;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-weight: 500;
 }
 
 .benefitsList {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
   border-top: 1px solid #e5e7eb;
 }
 
 .benefitItem {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   color: #6b7280;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.625rem;
+  font-weight: 500;
 }
 
 .benefitItem::before {
   content: "✓";
   color: #27ae60;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 1.125rem;
+  flex-shrink: 0;
 }
 
 /* Links Section */
@@ -194,6 +181,74 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.linkColumn h5 {
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  letter-spacing: -0.015em;
+}
+
+.linkColumn ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.linkColumn li a {
+  font-size: 0.9375rem;
+  color: #4b5563;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.linkColumn li a:hover {
+  color: #cb4154;
+  transform: translateX(4px);
+}
+
+.copyright {
+  text-align: center;
+  font-size: 0.8125rem;
+  color: #9ca3af;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .footer {
+    padding: 2rem 1rem 1rem;
+  }
+
+  .gridContainer {
+    gap: 2rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.125rem;
+  }
+
+  .benefitsHighlight {
+    font-size: 1rem;
+  }
+
+  .linksSection {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .appStoreSection {
+    padding: 1.5rem;
+  }
 }
 
 .linkColumn h5 {

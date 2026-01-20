@@ -78,7 +78,7 @@ const ManageChurchProjects: React.FC = () => {
       const response = await churchProjectService.uploadImage(file, (progress) => {
         setImageUploadProgress(progress);
       });
-      setFormData({ ...formData, image: response.imageUrl });
+      setFormData({ ...formData, image: (response as any).imageUrl });
     } catch (error) {
       console.error('Error uploading image:', error);
     } finally {
@@ -93,7 +93,7 @@ const ManageChurchProjects: React.FC = () => {
       const response = await churchProjectService.uploadVideo(file, (progress) => {
         setVideoUploadProgress(progress);
       });
-      setFormData({ ...formData, video: response.videoUrl });
+      setFormData({ ...formData, video: (response as any).videoUrl });
     } catch (error) {
       console.error('Error uploading video:', error);
     } finally {

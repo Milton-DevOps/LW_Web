@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from './Button';
 
 interface ProjectCardProps {
   title: string;
@@ -21,19 +22,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   startDate,
   endDate,
 }) => {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return '#27ae60';
-      case 'completed':
-        return '#3498db';
-      case 'planned':
-        return '#f39c12';
-      default:
-        return '#95a5a6';
-    }
-  };
-
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'active':
@@ -55,20 +43,20 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+    <div className="bg-white shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col">
       {/* Project Image */}
       {image ? (
-        <div className="relative w-full h-48 bg-gray-200 overflow-hidden">
+        <div className="relative w-full h-48 sm:h-52 bg-gray-200 overflow-hidden">
           <img
             src={image}
             alt={title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
           />
         </div>
       ) : (
-        <div className="w-full h-48 bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
+        <div className="w-full h-48 sm:h-52 bg-gray-300 flex items-center justify-center">
           <svg
-            className="w-16 h-16 text-gray-500"
+            className="w-16 h-16 text-gray-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -84,27 +72,32 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       )}
 
       {/* Project Content */}
-      <div className="p-5 sm:p-6">
+      <div className="p-5 sm:p-6 flex flex-col flex-grow">
         {/* Category and Status */}
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+        <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
+          <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2.5 py-1.5 whitespace-nowrap">
             {category}
           </span>
           <span
-            className="text-xs font-semibold text-white px-3 py-1 rounded-full"
-            style={{ backgroundColor: getStatusColor(status) }}
+            className={`text-xs font-semibold text-white px-2.5 py-1.5 whitespace-nowrap ${
+              status === 'active'
+                ? 'bg-green-600'
+                : status === 'completed'
+                ? 'bg-blue-600'
+                : 'bg-yellow-500'
+            }`}
           >
             {getStatusLabel(status)}
           </span>
         </div>
 
         {/* Title */}
-        <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 line-clamp-2">
+        <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 line-clamp-2 leading-tight">
           {title}
         </h3>
 
         {/* Description */}
-        <p className="text-sm text-gray-600 mb-4 line-clamp-3">
+        <p className="text-sm text-gray-600 mb-4 line-clamp-3 flex-grow">
           {description}
         </p>
 
@@ -112,12 +105,12 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         {progress > 0 && (
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-gray-700">Progress</span>
+              <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Progress</span>
               <span className="text-xs font-bold text-gray-900">{progress}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-200 h-2">
               <div
-                className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                className="bg-[#cb4154] h-full transition-all duration-300"
                 style={{ width: `${Math.min(progress, 100)}%` }}
               />
             </div>
@@ -125,9 +118,9 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         )}
 
         {/* Date Range */}
-        <div className="flex items-center text-xs text-gray-500 space-x-2">
+        <div className="flex items-center text-xs text-gray-500 space-x-2 mb-4 sm:mb-5">
           <svg
-            className="w-4 h-4"
+            className="w-4 h-4 flex-shrink-0"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -139,16 +132,16 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
             />
           </svg>
-          <span>
+          <span className="font-medium">
             {formatDate(startDate)}
             {endDate && ` - ${formatDate(endDate)}`}
           </span>
         </div>
 
         {/* View Details Button */}
-        <button className="w-full mt-5 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-lg transition-colors duration-200">
+        <Button variant="secondary" fullWidth className="mt-auto">
           View Details
-        </button>
+        </Button>
       </div>
     </div>
   );

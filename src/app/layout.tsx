@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${poppins.variable} antialiased bg-gradient-to-b from-black via-gray-950 to-black min-h-screen`}
+        className={`${poppins.variable} antialiased bg-gray-50 min-h-screen`}
       >
         <GoogleOAuthProvider clientId={googleClientId}>
           <Providers>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Carousel, Navbar } from "@/components";
+import { Carousel, Navbar, Button, ProjectModal, AllProjectsModal } from "@/components";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import { ProjectCard } from "@/components/ProjectCard";
@@ -12,6 +12,9 @@ export default function Home() {
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [projectsError, setProjectsError] = useState<string | null>(null);
   const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
+  const [selectedProject, setSelectedProject] = useState<ChurchProject | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAllProjectsModalOpen, setIsAllProjectsModalOpen] = useState(false);
   const projectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const carouselItems = [
@@ -87,22 +90,32 @@ export default function Home() {
     setCurrentProjectIndex(index);
   };
 
+  const handleLearnMore = (project: ChurchProject) => {
+    setSelectedProject(project);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedProject(null);
+  };
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
       <main className="flex-grow">
         <Carousel items={carouselItems} />
 
         {/* Church Projects Section - Carousel View */}
         {projects.length > 0 && (
-          <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+          <section className="py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl mx-auto">
               {/* Section Header */}
-              <div className="text-center mb-12">
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              <div className="text-center mb-12 sm:mb-16">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
                   Church Projects
                 </h2>
-                <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-gray-700 max-w-2xl mx-auto leading-relaxed">
                   Discover our ongoing initiatives and the impact we're making in our community.
                 </p>
               </div>
@@ -110,8 +123,8 @@ export default function Home() {
               {/* Project Carousel Container */}
               <div className="relative">
                 {/* Main Project Card - Large Display */}
-                <div className="relative mb-8">
-                  <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div className="relative mb-8 sm:mb-10">
+                  <div className="bg-white shadow-md overflow-hidden">
                     {projects.map((project, index) => (
                       <div
                         key={project._id}
@@ -120,9 +133,9 @@ export default function Home() {
                           ${index === currentProjectIndex ? 'opacity-100' : 'opacity-0 hidden'}
                         `}
                       >
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                           {/* Project Image */}
-                          <div className="relative w-full h-80 bg-gray-200 overflow-hidden rounded-lg">
+                          <div className="relative w-full h-64 sm:h-80 md:h-96 bg-gray-200 overflow-hidden">
                             {project.image ? (
                               <img
                                 src={project.image}
@@ -130,9 +143,9 @@ export default function Home() {
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-300 to-gray-400">
+                              <div className="w-full h-full flex items-center justify-center bg-gray-300">
                                 <svg
-                                  className="w-24 h-24 text-gray-500"
+                                  className="w-24 h-24 text-gray-400"
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
@@ -149,15 +162,15 @@ export default function Home() {
                           </div>
 
                           {/* Project Details */}
-                          <div className="p-6 md:p-8 flex flex-col justify-between">
+                          <div className="p-6 sm:p-8 md:p-10 flex flex-col justify-between">
                             {/* Category and Status */}
                             <div>
                               <div className="flex items-center gap-3 mb-4">
-                                <span className="text-xs font-semibold text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+                                <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-3 py-1.5">
                                   {project.category}
                                 </span>
                                 <span
-                                  className="text-xs font-semibold text-white px-3 py-1 rounded-full"
+                                  className="text-xs font-semibold text-white px-3 py-1.5"
                                   style={{
                                     backgroundColor:
                                       project.status === 'active'
@@ -172,20 +185,20 @@ export default function Home() {
                               </div>
 
                               {/* Title */}
-                              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+                              <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                                 {project.title}
                               </h3>
 
                               {/* Description */}
-                              <p className="text-gray-700 text-base md:text-lg mb-6 leading-relaxed">
+                              <p className="text-gray-700 text-base sm:text-lg mb-6 leading-relaxed">
                                 {project.description}
                               </p>
 
                               {/* Details Grid */}
-                              <div className="grid grid-cols-2 gap-4 mb-6">
+                              <div className="grid grid-cols-2 gap-4 sm:gap-6 mb-6">
                                 <div>
-                                  <p className="text-xs text-gray-600 font-semibold mb-1">Start Date</p>
-                                  <p className="text-sm md:text-base font-semibold text-gray-900">
+                                  <p className="text-xs text-gray-600 font-semibold mb-1 uppercase tracking-wide">Start Date</p>
+                                  <p className="text-sm sm:text-base font-semibold text-gray-900">
                                     {new Date(project.startDate).toLocaleDateString('en-US', {
                                       year: 'numeric',
                                       month: 'short',
@@ -195,8 +208,8 @@ export default function Home() {
                                 </div>
                                 {project.endDate && (
                                   <div>
-                                    <p className="text-xs text-gray-600 font-semibold mb-1">End Date</p>
-                                    <p className="text-sm md:text-base font-semibold text-gray-900">
+                                    <p className="text-xs text-gray-600 font-semibold mb-1 uppercase tracking-wide">End Date</p>
+                                    <p className="text-sm sm:text-base font-semibold text-gray-900">
                                       {new Date(project.endDate).toLocaleDateString('en-US', {
                                         year: 'numeric',
                                         month: 'short',
@@ -207,8 +220,8 @@ export default function Home() {
                                 )}
                                 {project.budget && (
                                   <div>
-                                    <p className="text-xs text-gray-600 font-semibold mb-1">Budget</p>
-                                    <p className="text-sm md:text-base font-semibold text-gray-900">
+                                    <p className="text-xs text-gray-600 font-semibold mb-1 uppercase tracking-wide">Budget</p>
+                                    <p className="text-sm sm:text-base font-semibold text-gray-900">
                                       ${project.budget.toLocaleString()}
                                     </p>
                                   </div>
@@ -217,14 +230,14 @@ export default function Home() {
 
                               {/* Progress Bar */}
                               {project.progress !== undefined && (
-                                <div className="mb-4">
+                                <div className="mb-6">
                                   <div className="flex justify-between items-center mb-2">
-                                    <p className="text-xs text-gray-600 font-semibold">Progress</p>
-                                    <p className="text-xs font-semibold text-gray-900">{project.progress}%</p>
+                                    <p className="text-xs text-gray-600 font-semibold uppercase tracking-wide">Progress</p>
+                                    <p className="text-xs font-bold text-gray-900">{project.progress}%</p>
                                   </div>
-                                  <div className="w-full bg-gray-200 rounded-full h-2">
+                                  <div className="w-full bg-gray-200 h-2">
                                     <div
-                                      className="bg-[#cb4154] h-full rounded-full transition-all duration-300"
+                                      className="bg-[#cb4154] h-full transition-all duration-300"
                                       style={{ width: `${project.progress}%` }}
                                     />
                                   </div>
@@ -233,25 +246,29 @@ export default function Home() {
                             </div>
 
                             {/* Learn More Button */}
-                            <button className="w-full px-4 py-2 bg-[#cb4154] hover:bg-[#a83645] text-white font-semibold rounded-lg transition-colors duration-200">
+                            <Button 
+                              fullWidth 
+                              variant="primary"
+                              onClick={() => handleLearnMore(projects[currentProjectIndex])}
+                            >
                               Learn More
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
 
-                  {/* Navigation Arrows */}
+                  {/* Navigation Arrows - Responsive */}
                   {projects.length > 1 && (
                     <>
                       <button
                         onClick={prevProject}
-                        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 md:-translate-x-20 z-20 p-2 rounded-full bg-white shadow-lg hover:bg-gray-100 transition-colors duration-200"
+                        className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 md:-translate-x-20 z-20 p-2 bg-white shadow-md hover:shadow-lg hover:bg-gray-50 transition-all duration-200 items-center justify-center"
                         aria-label="Previous project"
                       >
                         <svg
-                          className="w-6 h-6 text-gray-900"
+                          className="w-6 h-6 text-gray-800"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -267,11 +284,11 @@ export default function Home() {
 
                       <button
                         onClick={nextProject}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 md:translate-x-20 z-20 p-2 rounded-full bg-white shadow-lg hover:bg-gray-100 transition-colors duration-200"
+                        className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 md:translate-x-20 z-20 p-2 bg-white shadow-md hover:shadow-lg hover:bg-gray-50 transition-all duration-200 items-center justify-center"
                         aria-label="Next project"
                       >
                         <svg
-                          className="w-6 h-6 text-gray-900"
+                          className="w-6 h-6 text-gray-800"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -290,16 +307,16 @@ export default function Home() {
 
                 {/* Project Indicators/Thumbnails */}
                 {projects.length > 1 && (
-                  <div className="flex justify-center gap-3 mb-8">
+                  <div className="flex justify-center gap-2 sm:gap-3 mb-8 sm:mb-10 overflow-x-auto">
                     {projects.map((project, index) => (
                       <button
                         key={project._id}
                         onClick={() => goToProject(index)}
                         className={`
-                          relative w-16 h-16 rounded-lg overflow-hidden border-2 transition-all duration-300
+                          flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 overflow-hidden border-2 transition-all duration-300
                           ${
                             index === currentProjectIndex
-                              ? 'border-[#cb4154] shadow-lg'
+                              ? 'border-[#cb4154] shadow-md'
                               : 'border-gray-300 hover:border-gray-400'
                           }
                         `}
@@ -312,7 +329,7 @@ export default function Home() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
+                          <div className="w-full h-full bg-gray-300 flex items-center justify-center">
                             <span className="text-xs font-bold text-gray-600">{index + 1}</span>
                           </div>
                         )}
@@ -323,12 +340,14 @@ export default function Home() {
 
                 {/* View All Button */}
                 <div className="text-center">
-                  <a
-                    href="/programs"
-                    className="inline-block px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200"
+                  <Button 
+                    variant="secondary" 
+                    size="lg" 
+                    className="inline-block"
+                    onClick={() => setIsAllProjectsModalOpen(true)}
                   >
                     View All Projects
-                  </a>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -336,15 +355,15 @@ export default function Home() {
         )}
 
         {/* Pastor Message Section */}
-        <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <section className="py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 bg-white">
           <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
               {/* Text Content */}
               <div className="order-2 md:order-1">
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
                   A Message From Our Pastor
                 </h2>
-                <p className="text-base sm:text-lg text-gray-700 mb-4 leading-relaxed">
+                <p className="text-base sm:text-lg text-gray-700 mb-4 leading-relaxed font-medium">
                   Beloved,
                 </p>
                 <p className="text-base sm:text-lg text-gray-700 mb-4 leading-relaxed">
@@ -354,22 +373,22 @@ export default function Home() {
                   nurtured, the lost are saved, and the glory of God transforms lives.
                 </p>
                 
-                <blockquote className="border-l-4 border-[#cb4154] pl-4 my-6 italic text-gray-700">
-                  <p className="text-lg mb-2">
+                <div className="border-l-4 border-[#cb4154] pl-5 sm:pl-6 my-6 sm:my-8 py-2">
+                  <p className="text-base sm:text-lg text-gray-700 italic mb-3 font-medium">
                     "Go up to the mountain and bring wood, and build the house; and I will 
                     take pleasure in it, and I will be glorified."
                   </p>
-                  <p className="text-sm font-semibold">— Haggai 1:8</p>
-                </blockquote>
+                  <p className="text-sm sm:text-base font-semibold text-gray-900">— Haggai 1:8</p>
+                </div>
 
-                <p className="text-base sm:text-lg text-gray-700 mb-6 leading-relaxed">
+                <p className="text-base sm:text-lg text-gray-700 mb-8 leading-relaxed">
                   We invite you to join hands with us in faith, sacrifice, and generosity as 
                   we build a sanctuary for generations to come.
                 </p>
 
-                <div className="mt-8">
-                  <p className="font-bold text-lg text-gray-900">General Overseer, Light World Mission Int'l</p>
-                  <p className="text-gray-700">— Rev. Dr. Nsame Leslie Nfor</p>
+                <div className="pt-4">
+                  <p className="font-bold text-base sm:text-lg text-gray-900">General Overseer, Light World Mission Int'l</p>
+                  <p className="text-gray-700 text-base sm:text-lg mt-1">Rev. Dr. Nsame Leslie Nfor</p>
                 </div>
               </div>
 
@@ -388,13 +407,27 @@ export default function Home() {
         </section>
 
         {/* Featured Section */}
-        <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <section className="py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {/* Feature cards */}
           </div>
         </section>
       </main>
       <Footer />
+      
+      {/* Project Detail Modal */}
+      <ProjectModal 
+        project={selectedProject} 
+        isOpen={isModalOpen} 
+        onClose={closeModal}
+      />
+
+      {/* All Projects Modal */}
+      <AllProjectsModal
+        projects={projects}
+        isOpen={isAllProjectsModalOpen}
+        onClose={() => setIsAllProjectsModalOpen(false)}
+      />
     </div>
   );
 }

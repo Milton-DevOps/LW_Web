@@ -14,7 +14,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className={widthStyle}>
         {label && (
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-gray-800 mb-2">
             {label}
           </label>
         )}
@@ -31,15 +31,18 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             placeholder-gray-500
             focus:outline-none
             focus:border-[#cb4154]
-            transition-colors
+            focus:ring-2
+            focus:ring-[#cb4154]
+            focus:ring-opacity-10
+            transition-all
             duration-200
-            ${error ? 'border-red-500' : ''}
+            ${error ? 'border-red-500 focus:border-red-500' : ''}
             ${className}
           `}
           {...props}
         />
         {error && (
-          <p className="text-sm text-red-500 mt-1">
+          <p className="text-sm font-medium text-red-600 mt-1.5">
             {error}
           </p>
         )}
@@ -48,4 +51,4 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-Input.displayName = 'Input';
+Input.displayName = 'Input';Input.displayName = 'Input';

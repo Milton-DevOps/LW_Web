@@ -14,18 +14,12 @@ export const Footer: React.FC = () => {
   // Google Play Store SVG Icon
   const GooglePlayIcon = () => (
     <svg viewBox="0 0 135 40" className={styles.appBadgeSvg}>
-      <defs>
-        <linearGradient id="playGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#1f9fe8" />
-          <stop offset="100%" stopColor="#4285f4" />
-        </linearGradient>
-      </defs>
       {/* Background */}
-      <rect width="135" height="40" rx="5" fill="white" stroke="#ddd" strokeWidth="1" />
+      <rect width="135" height="40" fill="white" stroke="#d1d5db" strokeWidth="1" />
       
       {/* Google Play Logo */}
       <g transform="translate(8, 8)">
-        <path d="M6 0L0 6V18L6 24L12 18V6Z" fill="url(#playGradient)" />
+        <path d="M6 0L0 6V18L6 24L12 18V6Z" fill="#4285f4" />
         <path d="M0 6L6 12L12 6Z" fill="#ea4335" />
         <path d="M0 18L6 12L12 18Z" fill="#34a853" />
       </g>
@@ -39,22 +33,16 @@ export const Footer: React.FC = () => {
   // Apple App Store SVG Icon
   const AppStoreIcon = () => (
     <svg viewBox="0 0 135 40" className={styles.appBadgeSvg}>
-      <defs>
-        <linearGradient id="appleGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#555" />
-          <stop offset="100%" stopColor="#222" />
-        </linearGradient>
-      </defs>
       {/* Background */}
-      <rect width="135" height="40" rx="5" fill="white" stroke="#ddd" strokeWidth="1" />
+      <rect width="135" height="40" fill="white" stroke="#d1d5db" strokeWidth="1" />
       
       {/* Apple Logo */}
       <g transform="translate(8, 6)">
         <path
           d="M14 0c-1.5 0-2.8.5-3.8 1.4-1 .9-1.5 2-1.5 3.3 0 1.3.5 2.4 1.5 3.3 1 .9 2.3 1.4 3.8 1.4 1.5 0 2.8-.5 3.8-1.4 1-.9 1.5-2 1.5-3.3 0-1.3-.5-2.4-1.5-3.3C16.8.5 15.5 0 14 0z"
-          fill="url(#appleGradient)"
+          fill="#000"
         />
-        <circle cx="3" cy="8" r="2.5" fill="url(#appleGradient)" />
+        <circle cx="3" cy="8" r="2.5" fill="#000" />
       </g>
       
       {/* Text */}
@@ -73,7 +61,7 @@ export const Footer: React.FC = () => {
               📬 Stay Connected
             </h3>
             <p className={styles.sectionSubtitle}>Sign up to our newsletter</p>
-            <p style={{ fontSize: '0.8125rem', color: '#6b7280', marginBottom: '0.5rem' }}>
+            <p className={styles.interestLabel}>
               I'm interested in
             </p>
 
@@ -97,9 +85,9 @@ export const Footer: React.FC = () => {
                 aria-label="Email address"
                 placeholder="Enter your email"
                 type="email"
-                className={styles.newsletterInput}
+                fullWidth
               />
-              <Button type="submit" variant="primary" size="sm">
+              <Button type="submit" variant="primary" fullWidth>
                 Subscribe Now
               </Button>
             </form>
