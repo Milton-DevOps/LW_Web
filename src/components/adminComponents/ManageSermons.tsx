@@ -42,7 +42,7 @@ const ManageSermons: React.FC = () => {
     try {
       setFetchLoading(true);
       const response = await sermonService.getSermons({ status: 'all', limit: 100 });
-      setSermons(response.sermons || []);
+      setSermons(response.data || []);
     } catch (error) {
       console.error('Failed to fetch sermons:', error);
       alert('Failed to fetch sermons');

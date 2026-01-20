@@ -11,10 +11,11 @@ import ManageSermons from './ManageSermons';
 import ManageUsers from './ManageUsers';
 import ManageBooks from './ManageBooks';
 import ManageDepartments from './ManageDepartments';
+import ManageChurchProjects from '../mediaComponents/ManageChurchProjects';
 import LiveStream from './LiveStream';
 import Settings from './Settings';
 
-type DashboardSection = 'dashboard' | 'sermons' | 'live' | 'users' | 'books' | 'departments' | 'settings';
+type DashboardSection = 'dashboard' | 'sermons' | 'live' | 'users' | 'books' | 'departments' | 'projects' | 'settings';
 
 interface DashboardStats {
   sermons: {
@@ -82,6 +83,8 @@ const AdminDashboard: React.FC = () => {
         return <ManageBooks />;
       case 'departments':
         return <ManageDepartments />;
+      case 'projects':
+        return <ManageChurchProjects />;
       case 'settings':
         return <Settings />;
       default:

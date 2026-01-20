@@ -3,6 +3,7 @@ export { Input } from './Input';
 export { Hero } from './Hero';
 export { Carousel } from './Carousel';
 export { Navbar } from './Navbar';
+export { ProjectCard } from './ProjectCard';
 
 // Admin Components
 export { default as AdminDashboard } from './adminComponents/AdminDashboard';

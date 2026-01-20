@@ -4,12 +4,14 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from './Button';
 
 export const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, handleLogout } = useAuthContext();
+  const { settings } = useSettings();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -69,6 +71,12 @@ export const Navbar = () => {
   };
 
   const profilePictureUrl = user?.profilePicture?.url;
+  const siteInitials = settings?.siteName
+    ?.split(' ')
+    .map((word: string) => word[0])
+    .join('')
+    .toUpperCase()
+    .substring(0, 3) || 'LWM';
 
   return (
     <>
@@ -87,10 +95,11 @@ export const Navbar = () => {
               href="/"
               className="flex-shrink-0 group"
               onClick={() => setActiveLink('/')}
+              title={settings?.siteName || 'Light World Mission'}
             >
               <div className="relative">
                 <div className="text-3xl font-bold tracking-wider text-white group-hover:text-[#cb4154] transition-all duration-500 ease-out">
-                  LWM
+                  {siteInitials}
                 </div>
                 <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#e09510] group-hover:w-full transition-all duration-500 ease-out"></div>
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-[#cb4154] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

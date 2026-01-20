@@ -86,11 +86,11 @@ const Sidebar: React.FC<SidebarProps> = ({
     {
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21H5a2 2 0 01-2-2V9a2 2 0 012-2h4l2-3h2l2 3h4a2 2 0 012 2v10a2 2 0 01-2 2z" />
         </svg>
       ),
-      label: 'Manage Departments',
-      id: 'departments',
+      label: 'Manage Church Projects',
+      id: 'projects',
       roles: ['admin'],
     },
     {

@@ -38,7 +38,7 @@ const LiveSessions: React.FC = () => {
     try {
       setFetchLoading(true);
       const response = await liveStreamService.getLiveStreams({ limit: 100 });
-      setSessions(response.streams || []);
+      setSessions(response.data || []);
     } catch (error) {
       console.error('Failed to fetch sessions:', error);
       alert('Failed to fetch live stream sessions');

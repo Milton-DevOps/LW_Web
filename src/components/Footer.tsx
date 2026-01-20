@@ -3,10 +3,13 @@
 import React from 'react';
 import Link from 'next/link';
 import { Button, Input } from '@/components';
+import { useSettings } from '@/contexts/SettingsContext';
 import styles from './Footer.module.css';
 
 export const Footer: React.FC = () => {
   const year = new Date().getFullYear();
+  const { settings } = useSettings();
+  const siteName = settings?.siteName || 'Light World Mission';
 
   // Google Play Store SVG Icon
   const GooglePlayIcon = () => (
@@ -101,7 +104,7 @@ export const Footer: React.FC = () => {
               </Button>
             </form>
 
-            <p className={styles.footerCredit}>Light World Mission © {year}</p>
+            <p className={styles.footerCredit}>{siteName} © {year}</p>
           </div>
 
           {/* App Store Section */}
@@ -118,7 +121,7 @@ export const Footer: React.FC = () => {
             <div className={styles.benefitsText}>
               <p className={styles.benefitsHighlight}>Exclusive App Benefits</p>
               <p className={styles.benefitsSubtext}>
-                Get the full Light World Mission experience with our mobile app
+                Get the full {siteName} experience with our mobile app
               </p>
               <div className={styles.benefitsList}>
                 <div className={styles.benefitItem}>Instant notifications for new content</div>
@@ -153,7 +156,7 @@ export const Footer: React.FC = () => {
             </div>
 
             <div className={styles.copyright}>
-              © {year} Light World Mission. All rights reserved.
+              © {year} {siteName}. All rights reserved.
             </div>
           </div>
         </div>

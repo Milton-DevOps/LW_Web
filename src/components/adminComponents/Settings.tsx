@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, Input } from '@/components';
 import { colors } from '@/constants/colors';
 import { settingsService } from '@/services/settingsService';
+import { useSettings } from '@/contexts/SettingsContext';
 import styles from './Settings.module.css';
 
 // eslint-disable-next-line @next/next/no-css-in-js
@@ -13,6 +14,7 @@ interface ValidationErrors {
 
 const Settings: React.FC = () => {
   const colorScheme = colors;
+  const { refreshSettings: refreshGlobalSettings } = useSettings();
   const [settings, setSettings] = useState({
     siteName: 'Light World Mission',
     siteEmail: 'admin@lightworldmission.com',
@@ -132,6 +134,8 @@ const Settings: React.FC = () => {
       });
       setIsSaved(true);
       setValidationErrors({});
+      // Refresh global settings context
+      await refreshGlobalSettings();
       setTimeout(() => setIsSaved(false), 3000);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to save settings';
@@ -150,6 +154,7 @@ const Settings: React.FC = () => {
       setShowResetConfirm(false);
       setValidationErrors({});
       await fetchSettings();
+      await refreshGlobalSettings();
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 3000);
     } catch (error) {

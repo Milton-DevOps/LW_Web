@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import { AuthProvider } from "./providers";
+import { Providers } from "./providers";
 import { Carousel, Navbar } from "@/components";
 import "./globals.css";
 import Footer from "@/components/Footer";
@@ -30,9 +30,9 @@ export default function RootLayout({
         className={`${poppins.variable} antialiased bg-gradient-to-b from-black via-gray-950 to-black min-h-screen`}
       >
         <GoogleOAuthProvider clientId={googleClientId}>
-          <AuthProvider>
+          <Providers>
             {children}
-          </AuthProvider>
+          </Providers>
         </GoogleOAuthProvider>
       </body>
     </html>

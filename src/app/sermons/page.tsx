@@ -174,80 +174,59 @@ export default function Sermons() {
     <div className={`${styles.bgSurface} min-h-screen flex flex-col`}>
       <Navbar />
 
+      {/* Live Stream Section - Full Width at Top */}
+      {activeLiveStream && (
+        <div className="w-full bg-black" data-live-stream>
+          <div className="relative w-full bg-black" style={{ paddingBottom: '56.25%' }}>
+            {/* Live Badge */}
+            <div className="absolute top-4 left-4 z-10">
+              <div className="flex items-center space-x-2 bg-red-600 px-4 py-2 rounded-full">
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                <span className="text-white text-sm font-bold">LIVE NOW</span>
+              </div>
+            </div>
+
+            {/* Viewers Count */}
+            <div className="absolute top-4 right-4 z-10 bg-white/20 px-4 py-2 rounded-full backdrop-blur">
+              <p className="text-white text-sm font-semibold">
+                👥 {activeLiveStream.viewers?.toLocaleString() || 0} viewers
+              </p>
+            </div>
+
+            {/* Stream Title and Host Overlay - Bottom of video */}
+            <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/80 to-transparent p-6">
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">{activeLiveStream.title}</h2>
+              <p className="text-gray-200 text-sm md:text-base mb-2">
+                <span className="font-semibold">Host:</span> {activeLiveStream.host}
+              </p>
+              {activeLiveStream.description && (
+                <p className="text-gray-300 text-sm line-clamp-2">{activeLiveStream.description}</p>
+              )}
+            </div>
+
+            {/* Video Player */}
+            <iframe
+              className="absolute top-0 left-0 w-full h-full"
+              src={`${activeLiveStream.streamUrl}${activeLiveStream.streamUrl.includes('?') ? '&' : '?'}autoplay=1`}
+              title={activeLiveStream.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              loading="lazy"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
-      <main className="flex-1 pt-24">
-        {/* Hero Section */}
+      <main className="flex-1">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Hero Section */}
           <div className="text-center mb-12">
             <h1 className={`${styles.textDark} text-4xl font-bold mb-4`}>Sermons</h1>
             <p className={`${styles.textSecondary} text-lg max-w-2xl mx-auto`}>
               Listen to inspiring sermons from our spiritual leaders and expand your spiritual journey.
             </p>
           </div>
-
-          {/* Live Stream Section */}
-          {activeLiveStream && (
-            <div className="mb-16" data-live-stream>
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-black/50 border border-white/10 backdrop-blur-xl">
-                {/* Live Badge */}
-                <div className="absolute top-4 left-4 z-10">
-                  <div className="flex items-center space-x-2 bg-red-600 px-4 py-2 rounded-full">
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                    <span className="text-white text-sm font-bold">LIVE NOW</span>
-                  </div>
-                </div>
-
-                {/* Viewers Count */}
-                <div className="absolute top-4 right-4 z-10 bg-white/10 px-4 py-2 rounded-full backdrop-blur">
-                  <p className="text-white text-sm">
-                    👥 {activeLiveStream.viewers?.toLocaleString() || 0} viewers
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-8">
-                  {/* Video Player */}
-                  <div className="lg:col-span-2">
-                    <div className="relative w-full bg-black rounded-xl overflow-hidden" style={{ paddingBottom: '56.25%' }}>
-                      <iframe
-                        className="absolute top-0 left-0 w-full h-full"
-                        src={`${activeLiveStream.streamUrl}${activeLiveStream.streamUrl.includes('?') ? '&' : '?'}autoplay=1&mute=1`}
-                        title={activeLiveStream.title}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        loading="lazy"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Stream Info */}
-                  <div className="flex flex-col justify-between">
-                    <div>
-                      <h2 className="text-2xl font-bold text-white mb-3">{activeLiveStream.title}</h2>
-                      <p className="text-gray-300 mb-4">{activeLiveStream.description}</p>
-                      <div className="space-y-2">
-                        <p className="text-sm text-gray-400">
-                          <span className="font-semibold text-white">Host:</span> {activeLiveStream.host}
-                        </p>
-                        {activeLiveStream.category && (
-                          <p className="text-sm text-gray-400">
-                            <span className="font-semibold text-white">Category:</span>{' '}
-                            {activeLiveStream.category}
-                          </p>
-                        )}
-                        <p className="text-sm text-gray-400">
-                          <span className="font-semibold text-white">Started:</span>{' '}
-                          {formatDate(activeLiveStream.startTime)}
-                        </p>
-                      </div>
-                    </div>
-                    <Button variant="primary" fullWidth className="mt-6">
-                      Watch Now
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Search and Filter Section */}
           <div className="mb-12 space-y-6">

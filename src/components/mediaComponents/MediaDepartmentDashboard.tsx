@@ -12,8 +12,9 @@ import ManageSermons from './ManageSermons';
 import LiveSessions from './LiveSessions';
 import ManageMembers from './ManageMembers';
 import Announcements from './Announcements';
+import ManageChurchProjects from './ManageChurchProjects';
 
-type DashboardSection = 'dashboard' | 'sermons' | 'live' | 'members' | 'announcements';
+type DashboardSection = 'dashboard' | 'sermons' | 'live' | 'members' | 'announcements' | 'projects';
 
 interface DepartmentStats {
   totalMembers: number;
@@ -56,6 +57,8 @@ const MediaDepartmentDashboard: React.FC = () => {
         return <ManageMembers />;
       case 'announcements':
         return <Announcements />;
+      case 'projects':
+        return <ManageChurchProjects />;
       default:
         return <DashboardOverview />;
     }

@@ -15,17 +15,28 @@ export async function fetchAPI(
 ): Promise<Response> {
   const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
   
+  // Prepare headers - ensure Content-Type is only set if we have a body
+  const headers: Record<string, string> = {
+    ...options.headers,
+  };
+  
+  // Only set Content-Type if we have a body and it's not already set
+  if (options.body && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   const defaultOptions: FetchOptions = {
     credentials: 'include', // Include cookies in CORS requests
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
     ...options,
   };
 
   try {
-    console.log(`[FETCH] ${options.method || 'GET'} ${url}`);
+    console.log(`[FETCH] ${options.method || 'GET'} ${url}`, {
+      hasBody: !!defaultOptions.body,
+      hasAuth: !!headers['Authorization'],
+      contentType: headers['Content-Type']
+    });
     const response = await fetch(url, defaultOptions);
     
     // Log response status for debugging

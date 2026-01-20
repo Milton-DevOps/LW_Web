@@ -52,24 +52,34 @@ export const sermonService = {
     try {
       const token = getToken();
       console.log('[SERMON] createSermon: token available:', !!token);
-      console.log('[SERMON] createSermon: token value:', token ? `${token.substring(0, 20)}...` : 'NULL');
+      console.log('[SERMON] createSermon: sending data:', JSON.stringify(sermonData, null, 2));
       
       if (!token) {
         console.error('[SERMON] createSermon: No token found! Cannot create sermon.');
         throw new Error('Authentication required. Please log in again.');
       }
       
+      // Ensure body is JSON string
+      const jsonBody = typeof sermonData === 'string' ? sermonData : JSON.stringify(sermonData);
+      
       const response = await fetchAPI(`/sermons`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(sermonData),
+        body: jsonBody,
       });
       
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to create sermon');
+        let errorMessage = 'Failed to create sermon';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          console.error('[SERMON] Could not parse error response:', e);
+        }
+        throw new Error(errorMessage);
       }
       
       return await response.json();

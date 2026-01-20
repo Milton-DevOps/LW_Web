@@ -24,6 +24,8 @@ export default function Register() {
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [profilePreview, setProfilePreview] = useState<string | null>(null);
   const [formError, setFormError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [emailStatus, setEmailStatus] = useState<{sent?: boolean; error?: string} | null>(null);
 
   useEffect(() => {
     if (getToken()) {
@@ -49,6 +51,8 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
+    setSuccessMessage('');
+    setEmailStatus(null);
     clearError();
 
     // Validation
@@ -97,9 +101,42 @@ export default function Register() {
         userData.profilePictureUrl = profilePreview;
       }
 
-      await handleRegister(userData);
-      // Email/password registration goes directly to home
-      router.push('/');
+      // Make direct API call to get email status
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Registration failed');
+      }
+
+      const registrationData = await response.json();
+      
+      // Save token and user from registration response
+      saveToken(registrationData.token);
+      saveUser(registrationData.user);
+
+      // Check email status and show appropriate message
+      if (registrationData.emailSent !== undefined) {
+        setEmailStatus({
+          sent: registrationData.emailSent,
+          error: registrationData.emailError,
+        });
+        setSuccessMessage(
+          registrationData.emailSent 
+            ? '✅ Account created successfully! Welcome email has been sent to your inbox.' 
+            : '⚠️ Account created successfully. However, the welcome email could not be sent. Please contact support if needed.'
+        );
+        // Redirect after a short delay so user can see the message
+        setTimeout(() => router.push('/'), 2500);
+      } else {
+        router.push('/');
+      }
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Registration failed');
     }
@@ -169,6 +206,12 @@ export default function Register() {
           {(formError || error) && (
             <div className={styles.errorMessage} role="alert">
               {formError || error}
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="p-3 mb-4 bg-green-100 border border-green-400 text-green-800 rounded">
+              {successMessage}
             </div>
           )}
 
