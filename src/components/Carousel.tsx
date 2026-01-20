@@ -103,23 +103,7 @@ export const Carousel: React.FC<CarouselProps> = ({
         <>
           <button
             onClick={prevSlide}
-            className="
-              hidden sm:flex
-              absolute
-              left-4 sm:left-6 lg:left-8
-              top-1/2
-              -translate-y-1/2
-              z-30
-              p-2 sm:p-3
-              bg-white/20
-              hover:bg-white/40
-              backdrop-blur-sm
-              text-white
-              transition-all
-              duration-200
-              items-center
-              justify-center
-            "
+            className="hidden sm:flex absolute left-4 sm:left-6 lg:left-8 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-3 bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white transition-all duration-200 items-center justify-center"
             aria-label="Previous slide"
           >
             <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,23 +113,7 @@ export const Carousel: React.FC<CarouselProps> = ({
 
           <button
             onClick={nextSlide}
-            className="
-              hidden sm:flex
-              absolute
-              right-4 sm:right-6 lg:right-8
-              top-1/2
-              -translate-y-1/2
-              z-30
-              p-2 sm:p-3
-              bg-white/20
-              hover:bg-white/40
-              backdrop-blur-sm
-              text-white
-              transition-all
-              duration-200
-              items-center
-              justify-center
-            "
+            className="hidden sm:flex absolute right-4 sm:right-6 lg:right-8 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-3 bg-white/20 hover:bg-white/40 backdrop-blur-sm text-white transition-all duration-200 items-center justify-center"
             aria-label="Next slide"
           >
             <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,12 +130,7 @@ export const Carousel: React.FC<CarouselProps> = ({
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`
-                transition-all duration-300 rounded-full
-                ${index === currentIndex 
-                  ? 'bg-[#cb4154] w-8 sm:w-10 h-2 sm:h-3' 
-                  : 'bg-white/50 hover:bg-white/80 w-2 sm:w-3 h-2 sm:h-3'}
-              `}
+              className={`transition-all duration-300 rounded-full ${index === currentIndex ? 'bg-[#cb4154] w-8 sm:w-10 h-2 sm:h-3' : 'bg-white/50 hover:bg-white/80 w-2 sm:w-3 h-2 sm:h-3'}`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}

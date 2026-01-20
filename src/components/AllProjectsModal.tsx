@@ -13,6 +13,9 @@ interface AllProjectsModalProps {
 
 const ITEMS_PER_PAGE = 5;
 
+// Responsive breakpoints for AllProjectsModal
+// Mobile-first: optimize for mobile, then enhance for larger screens
+
 export function AllProjectsModal({ projects, isOpen, onClose }: AllProjectsModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'completed' | 'planned'>('all');
@@ -77,26 +80,26 @@ export function AllProjectsModal({ projects, isOpen, onClose }: AllProjectsModal
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8">
         <div
-          className="bg-white max-w-6xl w-full max-h-[90vh] overflow-y-auto shadow-xl relative"
+          className="bg-white w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-6xl max-h-[92vh] sm:max-h-[90vh] overflow-y-auto shadow-xl relative"
           onClick={(e) => e.stopPropagation()}
           role="dialog"
           aria-labelledby="all-projects-title"
         >
           {/* Header */}
-          <div className="sticky top-0 bg-white border-b border-gray-200 p-6 sm:p-8 z-20">
-            <div className="flex justify-between items-start mb-6">
-              <h2 id="all-projects-title" className="text-3xl sm:text-4xl font-bold text-gray-900">
-                All Church Projects
+          <div className="sticky top-0 bg-white border-b border-gray-200 p-3 sm:p-4 md:p-6 lg:p-8 z-20">
+            <div className="flex justify-between items-start gap-3 mb-4 sm:mb-6">
+              <h2 id="all-projects-title" className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 flex-1">
+                All Projects
               </h2>
               <button
                 onClick={onClose}
-                className="p-2 bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
+                className="p-1.5 sm:p-2 bg-gray-100 hover:bg-gray-200 transition-colors duration-200 flex-shrink-0"
                 aria-label="Close modal"
               >
                 <svg
-                  className="w-6 h-6 text-gray-700"
+                  className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-gray-700"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -112,9 +115,9 @@ export function AllProjectsModal({ projects, isOpen, onClose }: AllProjectsModal
             </div>
 
             {/* Search Input */}
-            <div className="mb-6">
+            <div className="mb-4 sm:mb-5 md:mb-6">
               <Input
-                placeholder="Search projects by title, description, or category..."
+                placeholder="Search projects..."
                 value={searchQuery}
                 onChange={(e) => handleFilterChange(() => setSearchQuery(e.target.value))}
                 fullWidth
@@ -122,17 +125,17 @@ export function AllProjectsModal({ projects, isOpen, onClose }: AllProjectsModal
             </div>
 
             {/* Filters */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
               {/* Status Filter */}
               <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">
-                  Filter by Status
+                <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1.5 sm:mb-2">
+                  Status
                 </label>
                 <select
                   aria-label="Filter by Status"
                   value={filterStatus}
                   onChange={(e) => handleFilterChange(() => setFilterStatus(e.target.value as any))}
-                  className="w-full px-4 py-2 border border-gray-300 bg-white focus:border-[#cb4154] focus:ring-2 focus:ring-[#cb4154] focus:ring-opacity-10 transition-colors"
+                  className="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-sm border border-gray-300 bg-white focus:border-[#cb4154] focus:ring-2 focus:ring-[#cb4154] focus:ring-opacity-10 transition-colors"
                 >
                   <option value="all">All Statuses</option>
                   <option value="active">Active</option>
@@ -143,14 +146,14 @@ export function AllProjectsModal({ projects, isOpen, onClose }: AllProjectsModal
 
               {/* Category Filter */}
               <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">
-                  Filter by Category
+                <label className="block text-xs sm:text-sm font-semibold text-gray-800 mb-1.5 sm:mb-2">
+                  Category
                 </label>
                 <select
                   aria-label="Filter by Category"
                   value={filterCategory}
                   onChange={(e) => handleFilterChange(() => setFilterCategory(e.target.value))}
-                  className="w-full px-4 py-2 border border-gray-300 bg-white focus:border-[#cb4154] focus:ring-2 focus:ring-[#cb4154] focus:ring-opacity-10 transition-colors"
+                  className="w-full px-3 sm:px-4 py-1.5 sm:py-2 text-sm border border-gray-300 bg-white focus:border-[#cb4154] focus:ring-2 focus:ring-[#cb4154] focus:ring-opacity-10 transition-colors"
                 >
                   <option value="all">All Categories</option>
                   {categories.map(cat => (
@@ -161,23 +164,23 @@ export function AllProjectsModal({ projects, isOpen, onClose }: AllProjectsModal
             </div>
 
             {/* Results Count */}
-            <p className="text-sm text-gray-600 mt-4">
+            <p className="text-xs sm:text-sm text-gray-600 mt-3 sm:mt-4">
               Showing {paginatedProjects.length} of {filteredProjects.length} project{filteredProjects.length !== 1 ? 's' : ''}
             </p>
           </div>
 
           {/* Content */}
-          <div className="p-6 sm:p-8">
+          <div className="p-3 sm:p-4 md:p-6 lg:p-8">
             {paginatedProjects.length > 0 ? (
-              <div className="space-y-6">
+              <div className="space-y-3 sm:space-y-4 md:space-y-6">
                 {paginatedProjects.map((project) => (
                   <div
                     key={project._id}
                     className="border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
                   >
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                       {/* Project Image */}
-                      <div className="relative w-full h-48 sm:h-full bg-gray-200 overflow-hidden">
+                      <div className="relative w-full h-40 sm:h-48 md:h-full bg-gray-200 overflow-hidden">
                         {project.image ? (
                           <img
                             src={project.image}
@@ -204,15 +207,15 @@ export function AllProjectsModal({ projects, isOpen, onClose }: AllProjectsModal
                       </div>
 
                       {/* Project Details */}
-                      <div className="sm:col-span-2 p-6 flex flex-col justify-between">
+                      <div className="md:col-span-2 p-3 sm:p-4 md:p-6 flex flex-col justify-between">
                         {/* Header Info */}
                         <div>
-                          <div className="flex items-center gap-2 mb-3">
-                            <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-1">
+                          <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 flex-wrap">
+                            <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 sm:py-1">
                               {project.category}
                             </span>
                             <span
-                              className="text-xs font-semibold text-white px-2 py-1"
+                              className="text-xs font-semibold text-white px-2 py-0.5 sm:py-1"
                               style={{
                                 backgroundColor:
                                   project.status === 'active'
@@ -226,19 +229,19 @@ export function AllProjectsModal({ projects, isOpen, onClose }: AllProjectsModal
                             </span>
                           </div>
 
-                          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                          <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-1.5 sm:mb-2">
                             {project.title}
                           </h3>
 
-                          <p className="text-gray-700 text-sm sm:text-base mb-4 line-clamp-2">
+                          <p className="text-gray-700 text-xs sm:text-sm md:text-base mb-3 sm:mb-4 line-clamp-2">
                             {project.description}
                           </p>
 
                           {/* Quick Info */}
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 mb-3 sm:mb-4">
                             <div>
-                              <p className="text-xs text-gray-600 font-semibold mb-1 uppercase">Start Date</p>
-                              <p className="text-sm font-semibold text-gray-900">
+                              <p className="text-xs text-gray-600 font-semibold mb-0.5 sm:mb-1 uppercase">Start</p>
+                              <p className="text-xs sm:text-sm font-semibold text-gray-900">
                                 {new Date(project.startDate).toLocaleDateString('en-US', {
                                   year: 'numeric',
                                   month: 'short',
@@ -248,23 +251,23 @@ export function AllProjectsModal({ projects, isOpen, onClose }: AllProjectsModal
                             </div>
                             {project.budget && (
                               <div>
-                                <p className="text-xs text-gray-600 font-semibold mb-1 uppercase">Budget</p>
-                                <p className="text-sm font-semibold text-gray-900">
+                                <p className="text-xs text-gray-600 font-semibold mb-0.5 sm:mb-1 uppercase">Budget</p>
+                                <p className="text-xs sm:text-sm font-semibold text-gray-900">
                                   ${project.budget.toLocaleString()}
                                 </p>
                               </div>
                             )}
                             {project.progress !== undefined && (
                               <div>
-                                <p className="text-xs text-gray-600 font-semibold mb-1 uppercase">Progress</p>
-                                <p className="text-sm font-semibold text-gray-900">{project.progress}%</p>
+                                <p className="text-xs text-gray-600 font-semibold mb-0.5 sm:mb-1 uppercase">Progress</p>
+                                <p className="text-xs sm:text-sm font-semibold text-gray-900">{project.progress}%</p>
                               </div>
                             )}
                           </div>
 
                           {/* Progress Bar */}
                           {project.progress !== undefined && (
-                            <div className="mb-4">
+                            <div className="mb-3 sm:mb-4">
                               <div className="w-full bg-gray-200 h-1.5">
                                 <div
                                   className="bg-[#cb4154] h-full transition-all duration-300"
@@ -280,7 +283,7 @@ export function AllProjectsModal({ projects, isOpen, onClose }: AllProjectsModal
                           variant="primary"
                           size="sm"
                           onClick={() => handleLearnMore(project)}
-                          className="w-full sm:w-auto"
+                          className="w-full md:w-auto text-xs sm:text-sm"
                         >
                           Learn More
                         </Button>
@@ -290,9 +293,9 @@ export function AllProjectsModal({ projects, isOpen, onClose }: AllProjectsModal
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12">
+              <div className="text-center py-8 sm:py-12">
                 <svg
-                  className="mx-auto h-12 w-12 text-gray-400 mb-4"
+                  className="mx-auto h-10 sm:h-12 w-10 sm:w-12 text-gray-400 mb-3 sm:mb-4"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -304,39 +307,39 @@ export function AllProjectsModal({ projects, isOpen, onClose }: AllProjectsModal
                     d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <p className="text-lg font-semibold text-gray-700 mb-2">No projects found</p>
-                <p className="text-gray-600">Try adjusting your search or filters</p>
+                <p className="text-base sm:text-lg font-semibold text-gray-700 mb-1.5 sm:mb-2">No projects found</p>
+                <p className="text-xs sm:text-sm text-gray-600">Try adjusting your search or filters</p>
               </div>
             )}
           </div>
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="border-t border-gray-200 p-6 sm:p-8 bg-gray-50">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p className="text-sm text-gray-600">
+            <div className="border-t border-gray-200 p-3 sm:p-4 md:p-6 lg:p-8 bg-gray-50">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+                <p className="text-xs sm:text-sm text-gray-600">
                   Page <span className="font-semibold">{currentPage}</span> of <span className="font-semibold">{totalPages}</span>
                 </p>
 
-                <div className="flex gap-2">
+                <div className="flex gap-1 sm:gap-2 flex-wrap justify-center sm:justify-end">
                   <Button
                     variant="secondary"
                     size="sm"
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
-                    className="disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2"
                   >
-                    Previous
+                    Prev
                   </Button>
 
                   {/* Page Numbers */}
-                  <div className="flex gap-1">
+                  <div className="flex gap-0.5 sm:gap-1">
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
                         className={`
-                          px-3 py-2 text-sm font-semibold transition-colors duration-200
+                          px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-colors duration-200
                           ${
                             page === currentPage
                               ? 'bg-[#cb4154] text-white'
@@ -354,7 +357,7 @@ export function AllProjectsModal({ projects, isOpen, onClose }: AllProjectsModal
                     size="sm"
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
-                    className="disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm px-2 sm:px-3 py-1.5 sm:py-2"
                   >
                     Next
                   </Button>
